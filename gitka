@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Usage:
+# gitka "commit message" branch-name
+# Example:
+# gitka "Fix EA bug" kaisara-version-6
+
+MSG=$1
+BRANCH=$2
+
+if [ -z "$MSG" ] || [ -z "$BRANCH" ]; then
+  echo "Usage: gitka \"commit message\" branch-name"
+  exit 1
+fi
+
+echo "Switching to branch '$BRANCH' (creating if it doesn't exist)..."
+git checkout -B "$BRANCH"
+
+echo "Adding all changes..."
+git add .
+
+echo "Committing with message: $MSG"
+git commit -m "$MSG"
+
+echo "Switching back to main branch..."
+git checkout main
+
+echo "Merging branch '$BRANCH' into main..."
+git merge --no-ff "$BRANCH"
+
+echo "Pushing changes to remote..."
+git push origin main
+git push origin "$BRANCH"
+
+echo "All done!"
+
