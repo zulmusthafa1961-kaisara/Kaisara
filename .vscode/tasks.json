@@ -7,7 +7,7 @@
       "command": "bash",
       "args": [
         "-c",
-        "\"${workspaceFolder}/copy_branch_ex5.sh\" TesterH1 \"FullKaisaraEA rev 6.ex5\""
+        "${workspaceFolder//\\\\//}/copy_branch_ex5.sh 'FullKaisaraEA rev 6.ex5'"
       ],
       "problemMatcher": []
     }
