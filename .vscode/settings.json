@@ -1,5 +1,8 @@
 {
     "C_Cpp.default.includePath": [
         "c:\\Program Files\\JustMarkets MetaTrader 5\\MetaEditor64.exe\\Include"
-    ]
+    ],
+    "files.associations": {
+        "*.mq5": "cpp"
+    }
 }
