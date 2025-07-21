@@ -4,8 +4,9 @@
     {
       "label": "Copy compiled EA for testing",
       "type": "shell",
-      "command": "${workspaceFolder}/copy_branch_ex5.sh",
+      "command": "bash",
       "args": [
+        "${workspaceFolder}/copy_branch_ex5.sh",
         "FullKaisaraEA rev 6.ex5"
       ],
       "problemMatcher": []
