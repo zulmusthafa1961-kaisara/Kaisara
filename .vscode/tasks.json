@@ -4,16 +4,13 @@
     {
       "label": "Copy compiled EA for testing",
       "type": "shell",
-      "command": "${workspaceFolder}/copy_branch_ex5.sh",
+      "command": "bash",
       "args": [
-        "${gitBranchName}",
-        "FullKaisaraEA rev 6.ex5"
+        "-c",
+        "\"${workspaceFolder}/copy_branch_ex5.sh\" TesterH1 \"FullKaisaraEA rev 6.ex5\""
       ],
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": false
-      }
+      "problemMatcher": []
     }
   ]
 }
+
