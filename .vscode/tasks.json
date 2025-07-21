@@ -6,8 +6,8 @@
       "type": "shell",
       "command": "bash",
       "args": [
-        "${workspaceFolder}/copy_branch_ex5.sh",
-        "FullKaisaraEA rev 6.ex5"
+        "-c",
+        "'/c/Users/zulmu/AppData/Roaming/MetaQuotes/Terminal/E7DB6AF1FE93F292652A5D3B98342601/MQL5/Experts/Kaisara/copy_branch_ex5.sh' 'FullKaisaraEA rev 6.ex5'"
       ],
       "problemMatcher": []
     }
