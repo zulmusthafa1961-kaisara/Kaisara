@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Copy compiled EA for testing",
+      "type": "shell",
+      "command": "${workspaceFolder}/copy_branch_ex5.sh",
+      "args": [
+        "${gitBranchName}",
+        "FullKaisaraEA rev 6.ex5"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    }
+  ]
+}
