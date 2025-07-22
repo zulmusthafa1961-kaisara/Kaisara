@@ -3,6 +3,7 @@
         "c:\\Program Files\\JustMarkets MetaTrader 5\\MetaEditor64.exe\\Include"
     ],
     "files.associations": {
-        "*.mq5": "cpp"
+        "*.mq5": "cpp",
+        "*.mqh": "cpp"
     }
 }
