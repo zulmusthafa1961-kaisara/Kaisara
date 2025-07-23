@@ -1,26 +1,25 @@
 #!/bin/bash
+set -e
+set -x
+set +H
 
-# Arguments:
-# $1 = branch name (e.g. kaisara-version-6)
-# $2 = compiled .ex5 filename (e.g. FullKaisaraEA_rev6.ex5)
+branch=$(git rev-parse --abbrev-ref HEAD)
+echo "Branch detected: $branch"
 
-BRANCH_NAME="$1"
-EX5_FILE="$2"
-REPO_DIR="$(pwd)"
+default_ex5="FullKaisaraEA.ex5"
 
-if [ -z "$BRANCH_NAME" ] || [ -z "$EX5_FILE" ]; then
-    echo "Usage: $0 <branch-name> <compiled-ex5-file>"
-    exit 1
+# Use first argument as compiled_ex5 filename, or default if none provided
+compiled_ex5="${1:-$default_ex5}"
+
+if [ ! -f "./$compiled_ex5" ]; then
+  echo "File not found: $compiled_ex5"
+  exit 1
 fi
 
-# Folder for this branch's compiled EA
-BRANCH_DIR="$REPO_DIR/$BRANCH_NAME"
+mkdir -p "./$branch"
 
-# Create branch folder if it doesn't exist
-mkdir -p "$BRANCH_DIR"
+dest_file="${compiled_ex5%.*} $branch.ex5"
 
-# Copy the compiled .ex5 file to the branch folder
-cp -v "$REPO_DIR/$EX5_FILE" "$BRANCH_DIR/"
+cp "./$compiled_ex5" "./$branch/$dest_file"
 
-echo "Copied $EX5_FILE to $BRANCH_DIR"
-
+echo "Copied $compiled_ex5 to ./$branch/$dest_file"
