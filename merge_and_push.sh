@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+set -x
+set +H
 
 branch=$(git rev-parse --abbrev-ref HEAD)
 main_branch="main"
