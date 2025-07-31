@@ -19,7 +19,7 @@ public:
 
    
    //RegimeType GetRegimeType() const { return local_regime_type; }
-   RegimeType GetRegimeType() {
+   RegimeType GetRegimeType() const{
       return local_regime_type;
    }
 
@@ -56,7 +56,7 @@ string GetRegimeTypeName() {
 };
 
 
-
+/*
 CArrayObj *LoadZonesFromMergedCSV(string fileName) {
    CArrayObj *_regimeZones = new CArrayObj;
 
@@ -106,6 +106,46 @@ CArrayObj *LoadZonesFromMergedCSV(string fileName) {
    FileClose(handle);
    return _regimeZones;
 }
+*/
+
+CArrayObj *LoadZonesFromEmbeddedCSV() {
+   CArrayObj *_regimeZones = new CArrayObj;
+
+   string embeddedText = "";
+   if (ArraySize(MergedZones) > 0) {
+      uchar buffer[];
+      ArrayCopy(buffer, MergedZones);
+      embeddedText = CharArrayToString(buffer);
+   } else {
+      Print("❌ Embedded resource is empty.");
+      return NULL;
+   }
+
+   string Lines[];
+   int lineCount = StringSplit(embeddedText, '\n', Lines);
+   for (int i = 1; i < lineCount; i++) {
+      string line = Lines[i];
+      if (StringLen(line) == 0) continue;
+
+      string parts[];
+      if (StringSplit(line, ',', parts) < 8) continue;
+
+      datetime t_start = StringToTime(parts[1]);
+      datetime t_end   = StringToTime(parts[2]);
+      double price_low = StringToDouble(parts[3]);
+      double price_high= StringToDouble(parts[4]);
+      int rect_count   = (int)StringToInteger(parts[5]);
+      string regime_tag = parts[6];
+      string regime_type_s = parts[7];
+
+      CZoneCSV *zone = CreateMergedZone(t_start, t_end, price_low, price_high,
+                                        rect_count, regime_tag, regime_type_s);
+      if (zone != NULL) _regimeZones.Add(zone);
+   }
+   return _regimeZones;
+}
+
+
 
 inline CZoneCSV *CreateMergedZone(datetime t_start, datetime t_end,
                                   double price_low, double price_high,

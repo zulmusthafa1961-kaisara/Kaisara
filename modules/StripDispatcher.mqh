@@ -1,15 +1,20 @@
-#ifndef __STRIPDISPATCHER_MQH__
-#define __STRIPDISPATCHER_MQH__
+#ifndef __STRIPBUILDER_MQH__
+#define __STRIPBUILDER_MQH__
 
+//#include "StripBuilder.mqh"
 #include "MapStringToPtr.mqh" // 🔁 Pull in explicitly to ensure type recognition
 #include "UnifiedRegimeModulesmqh.mqh"
+
+class CStripBuilder;  // forward declaration
 
 class CStripDispatcher
 {
 private:
     CMapStringToPtr builderMap;
     string keys[];
-    
+
+public:
+   void Dispatch(CArrayObj *zones, RegimeType regime);      
 
 public:
     void RegisterBuilder(const string &key, CStripBuilder *builder)
@@ -57,3 +62,8 @@ public:
 };
 
 #endif
+
+void CStripDispatcher::Dispatch(CArrayObj *zones, RegimeType regime) {
+   // TODO: Implement how zones get processed — this is a placeholder
+   PrintFormat("Dispatching %d zones for regime: %s", zones.Total(), EnumToString(regime));
+}

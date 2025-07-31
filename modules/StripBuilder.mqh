@@ -7,9 +7,15 @@
 class CStripBuilder : public CObject
 {
 
+   private:
+   CArrayObj *zones;
+   RegimeType currentRegime;  // if used
+
 public:
-    void AddZone(CZoneInfo *zone);
-    void Refresh();
+   void Build();  // 🔧 This builds the strips from source zones
+   RegimeType GetActiveRegime();  // 🔍 Returns current regime
+   void AddZone(CZoneInfo *zone);
+   void Refresh();
 
 private:
    // Labeling + color logic
@@ -28,6 +34,15 @@ private:
 
       return sv;
    }
+
+public:   
+
+void DispatchZones(CArrayObj *zoneList, RegimeType regime)
+{
+   static CStripDispatcher dispatcher;
+   dispatcher.Dispatch(zoneList, regime);
+}
+
 
 
 public:
@@ -57,6 +72,11 @@ public:
       }
    }
 
+   void SetSource(CArrayObj *sourceZones) {
+    zones = sourceZones;
+}
+
+
    // Friendly regime label
    static string MapRegimeLabel(RegimeType regimeType) {
       switch(regimeType) {
@@ -82,4 +102,95 @@ public:
    }
 };
 
+void Dispatch(CArrayObj *zones, RegimeType regime) {
+   if (zones == NULL) {
+      Print("❌ No zones to dispatch.");
+      return;
+   }
+
+   int total = zones.Total();
+   PrintFormat("🟢 Dispatching %d zone(s) for regime: %s", total, EnumToString(regime));
+
+   for (int i = 0; i < total; i++) {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone == NULL || zone.ClassName() != "CZoneCSV") continue;
+
+      PrintFormat("• Zone #%d | %s [%s] | t_start=%s | t_end=%s | Price Range=%.2f - %.2f",
+                  i + 1,
+                  zone.regime_tag,
+                  zone.GetRegimeTypeName(),
+                  TimeToString(zone.t_start),
+                  TimeToString(zone.t_end),
+                  zone.price_low,
+                  zone.price_high);
+   }
+}
+
+
+
 #endif
+/*
+void CStripBuilder::Build() {
+  // Step 1: Determine active regime
+  RegimeType regime = GetActiveRegime();
+  Print("Building strips for regime: ", EnumToString(regime));
+
+  // Step 2: Load zones from resource
+  ZoneLoader loader;
+  CArrayObj *zones = loader.LoadMergedZones(regime);  // abstracted loading per regime
+
+  if (zones == NULL || zones.Total() == 0) {
+    Print("No zones loaded for regime: ", EnumToString(regime));
+    return;
+  }
+
+  // Step 3: Fusion if needed
+  ZoneFusionManager fusionManager;
+  CArrayObj *mergedZones = fusionManager.Fuse(zones, regime);  // respects regime merge logic
+
+  // Step 4: Dispatch strips
+  StripDispatcher dispatcher;
+  dispatcher.Dispatch(mergedZones, regime);
+
+  // Step 5: Visualize
+  RegimeVisualizer visualizer;
+  visualizer.Render(mergedZones, regime);
+
+  // Step 6: Cleanup
+  delete zones;
+  delete mergedZones;
+}
+*/
+
+/*
+void CStripBuilder::Build() {
+  RegimeType regime = GetActiveRegime();
+
+ zones = LoadZonesFromEmbeddedCSV();
+
+  CArrayObj *zones = loader.LoadMergedZones(regime);
+  if (zones == NULL || zones.Total() == 0) return;
+
+  StripDispatcher dispatcher;
+  dispatcher.Dispatch(zones, regime);
+
+  delete zones;
+}
+*/
+
+void CStripBuilder::Build() {
+   RegimeType regime = GetActiveRegime();
+
+   zones = LoadZonesFromEmbeddedCSV();  // Uses embedded resource-based loader
+   if (zones == NULL || zones.Total() == 0) return;
+
+   CStripDispatcher dispatcher;  // Make sure StripDispatcher is properly included
+   dispatcher.Dispatch(zones, regime);
+
+   delete zones;
+   zones = NULL;  // Prevent dangling pointer
+}
+
+RegimeType CStripBuilder::GetActiveRegime() {
+   return currentRegime;
+}

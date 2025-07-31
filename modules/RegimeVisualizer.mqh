@@ -23,7 +23,9 @@ public:
          return;
 
       string stripName = "ZoneStrip_" + TimeToString(zone.t_start) + "_" + zone.regime_tag;
-      color regimeColor = GetRegimeColor(zone.regime_type);
+//      color regimeColor = GetRegimeColor(zone.regime_type);
+      color regimeColor = GetRegimeColor(zone.GetRegimeType());
+      
 
       bool alignLeft = ShouldDrawLeft(zone.regime_tag);
       if (alignLeft)
@@ -37,7 +39,7 @@ private:
       return (StringFind(tag, "Buy") >= 0 || StringFind(tag, "Green") >= 0);
    }
 
-   color GetRegimeColor(int type) {
+   color GetRegimeColor(RegimeType  type) {
       switch (type) {
          case REGIME_BUY: return clrGreen;
          case REGIME_SELL: return clrRed;
