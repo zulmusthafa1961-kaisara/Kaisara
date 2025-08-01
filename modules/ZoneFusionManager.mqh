@@ -78,19 +78,53 @@ public:
 #endif
 
 
-
+/*
   // Optionally: Sort or filter internal zone array post-fusion
-
 void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
   if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
 
   for (int i = 0; i < zonesToFuse.Total(); ++i) {
-    CZoneAnalyzer *zone = (CZoneAnalyzer *)zonesToFuse.At(i);
+    //CZoneAnalyzer *zone = (CZoneAnalyzer *)zonesToFuse.At(i);
+    CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(zonesToFuse.At(i));
     if (zone == NULL) continue;
 
     zone.MergeZones();  // 💡 Replaces MergeZone(zone)
   }
 }
+*/
+
+void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
+  if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
+
+   for (int i = 0; i < zonesToFuse.Total(); ++i)
+   {
+      CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(zonesToFuse.At(i));
+      if (zone == NULL)
+      {
+         Print("❌ Skipping invalid zone at index ", i);
+         continue;
+      }
+
+      datetime start = analyzer.GetStartTime(i);  // ✅ assuming i is the loop index
+      datetime end   = zone.GetEndTime(i);
+
+      color zoneColor = clrOrange;  // ✅ No conflict
+
+      if (zone.GetRegimeType(i) == REGIME_SELL)
+         zoneColor = clrTomato;
+      else if (zone.GetRegimeType(i) == REGIME_BUY)
+         zoneColor = clrLime;
+
+      start = analyzer.GetStartTime(i);     // ✅ reuse
+      end   = analyzer.GetEndTime(i);
+      zoneColor = clrOrange;
+      string label = "RAWZONE_" + IntegerToString(i);
+      analyzer.PlotZone(start, end, zoneColor);  // ✅ Fully declared, no compiler squawks
+      //PlotZone(start, end, label, zoneColor); // Replace with your actual subwindow drawing call
+   }
+
+}
+
 
 CArrayObj* CZoneFusionManager::GetFusedZones() {
   return &m_fusedZones;
