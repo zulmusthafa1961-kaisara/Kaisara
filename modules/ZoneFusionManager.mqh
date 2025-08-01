@@ -178,6 +178,8 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
          analyzer.PurgeAllRects(); // 🧹 clear chart rectangles
       }
 
+      analyzer.PurgeAllRects(); // 🧹 clear chart rectangles
+      
       ENUM_TIMEFRAMES tfEnum = (tf == "M5") ? PERIOD_M5 : PERIOD_H1;
       handle = iCustom(_Symbol, tfEnum, IndicatorFilename(), preloadBars);
 
