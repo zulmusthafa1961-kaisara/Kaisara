@@ -173,8 +173,10 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
 
    CArrayObj* LoadRegimeZones(string tf)
    {
-      analyzer.PurgeAllRects(); // 🧹 clear chart rectangles
-
+      //do not purge in Tester mode
+      if(OperationMode == ENUM_LIVE_ENV){
+         analyzer.PurgeAllRects(); // 🧹 clear chart rectangles
+      }
 
       ENUM_TIMEFRAMES tfEnum = (tf == "M5") ? PERIOD_M5 : PERIOD_H1;
       handle = iCustom(_Symbol, tfEnum, IndicatorFilename(), preloadBars);
