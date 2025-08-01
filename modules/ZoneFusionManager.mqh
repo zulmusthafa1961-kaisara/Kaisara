@@ -96,32 +96,40 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
 void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
   if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
 
-   for (int i = 0; i < zonesToFuse.Total(); ++i)
+for (int i = 0; i < zonesToFuse.Total(); ++i)
+{
+   CObject *obj = zonesToFuse.At(i);
+   if (obj == NULL)
    {
-      CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(zonesToFuse.At(i));
-      if (zone == NULL)
-      {
-         Print("❌ Skipping invalid zone at index ", i);
-         continue;
-      }
-
-      datetime start = analyzer.GetStartTime(i);  // ✅ assuming i is the loop index
-      datetime end   = zone.GetEndTime(i);
-
-      color zoneColor = clrOrange;  // ✅ No conflict
-
-      if (zone.GetRegimeType(i) == REGIME_SELL)
-         zoneColor = clrTomato;
-      else if (zone.GetRegimeType(i) == REGIME_BUY)
-         zoneColor = clrLime;
-
-      start = analyzer.GetStartTime(i);     // ✅ reuse
-      end   = analyzer.GetEndTime(i);
-      zoneColor = clrOrange;
-      string label = "RAWZONE_" + IntegerToString(i);
-      analyzer.PlotZone(start, end, zoneColor);  // ✅ Fully declared, no compiler squawks
-      //PlotZone(start, end, label, zoneColor); // Replace with your actual subwindow drawing call
+      Print("❌ Null object at index ", i);
+      continue;
    }
+
+   Print("🔍 Zone type at index ", i, ": ", obj.ClassName());
+
+   CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(obj);
+   if (zone == NULL)
+   {
+      Print("⚠️ Skipping non-CZoneAnalyzer object at index ", i);
+      continue;
+   }
+
+   // ✅ Safe to use 'zone' here as a fully valid CZoneAnalyzer
+
+   datetime start = zone.GetStartTime(i);     
+   datetime end   = zone.GetEndTime(i);
+   color zoneColor = clrOrange;
+
+   RegimeType regime = zone.GetRegimeType(i);
+   if (regime == REGIME_SELL)
+      zoneColor = clrTomato;
+   else if (regime == REGIME_BUY)
+      zoneColor = clrLime;
+
+   string label = "RAWZONE_" + IntegerToString(i);
+   zone.PlotZone(start, end, zoneColor);  // ✅ dispatch directly via zone instance
+}
+
 
 }
 
