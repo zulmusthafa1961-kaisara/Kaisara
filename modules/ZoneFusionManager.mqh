@@ -256,7 +256,7 @@ for (int i = 0; i < zonesToFuse.Total(); ++i)
    CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(obj);
    if (zone == NULL)
    {
-      Print("⚠️ Skipping non-CZoneAnalyzer object at index ", i);
+      Print("⚠️ Skipping non-CZoneAnalyzer object(s) at index ", i);
       continue;
    }
 
