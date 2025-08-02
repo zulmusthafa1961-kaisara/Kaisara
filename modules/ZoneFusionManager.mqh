@@ -129,19 +129,28 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
       CArrayObj *pZones = LoadRegimeZones(tf);
       if (pZones == NULL || pZones.Total() < 4) return;
 
-      regimeSlice.Clear();
-      for (int i = pZones.Total() - 4; i < pZones.Total(); i++)
-      {
-         CObject *zone = pZones.At(i);
-         if (zone != NULL)
-            regimeSlice.Add(zone);
+for (int i = 0; i < pZones.Total(); i++) {
+   CObject *zone = pZones.At(i);
+   if (zone != NULL)
+      regimeSlice.Add(zone);
+}
+
+      // 🛠️ Diagnostic block before SetSource
+      Print("🧪 Checking regimeSlice contents:");
+      for (int j = 0; j < regimeSlice.Total(); j++) {
+         CObject *z = regimeSlice.At(j);
+         if (z == NULL)
+            Print("❌ regimeSlice has NULL at index ", j);
+         else
+            Print("✅ regimeSlice[", j, "] = ", z);
       }
 
-      //builder.SetSource(&regimeSlice);   //invalid pointer access
-      if (regimeSlice.Total() > 0 && &regimeSlice != NULL)
-         builder.SetSource(&regimeSlice);
-      else
-         Print("⚠️ regimeSlice is either empty or invalid.");
+      // ✅ Fusion step
+      builder.SetSource(&regimeSlice);
+
+
+
+
 
 
 
