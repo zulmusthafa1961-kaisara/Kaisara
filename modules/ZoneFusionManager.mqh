@@ -129,30 +129,37 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
       CArrayObj *pZones = LoadRegimeZones(tf);
       if (pZones == NULL || pZones.Total() < 4) return;
 
-for (int i = 0; i < pZones.Total(); i++) {
-   CObject *zone = pZones.At(i);
-   if (zone != NULL)
-      regimeSlice.Add(zone);
-}
+      // 🔁 Step 1: Prepare regimeSlice – clear old contents
+      regimeSlice.Clear();
 
-      // 🛠️ Diagnostic block before SetSource
-      Print("🧪 Checking regimeSlice contents:");
+      // 🔁 Step 2: Deep copy zones from pZones
+      for (int i = 0; i < pZones.Total(); i++) {
+         CZone *origZone = (CZone *)pZones.At(i);
+         if (origZone != NULL) {
+            CZone *copyZone = new CZone();
+            
+            // ✅ Copy necessary attributes — customize as needed
+            copyZone.Assign(origZone);   // ← assumes you’ve defined Assign() in CZone class
+            // Or manually: copyZone.SetSomething(origZone.GetSomething());
+
+            regimeSlice.Add(copyZone);   // Now regimeSlice owns its own objects
+         }
+      }
+
+      // 🧪 Step 3: Diagnostic check before passing
+      Print("🧪 Checking regimeSlice integrity before SetSource");
       for (int j = 0; j < regimeSlice.Total(); j++) {
          CObject *z = regimeSlice.At(j);
          if (z == NULL)
-            Print("❌ regimeSlice has NULL at index ", j);
-         else
-            Print("✅ regimeSlice[", j, "] = ", z);
+            Print("❌ NULL inside regimeSlice at index ", j);
+         else {
+            CZone *zoneObj = (CZone *)z;
+            Print("✅ regimeSlice[", j, "] = Zone ID: ", zoneObj.Id());
+         }
       }
 
-      // ✅ Fusion step
+      // 🚀 Step 4: Safe assignment to builder
       builder.SetSource(&regimeSlice);
-
-
-
-
-
-
 
 
    }
