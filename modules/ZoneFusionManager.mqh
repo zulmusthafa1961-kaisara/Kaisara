@@ -137,12 +137,16 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
          CZone *origZone = NULL;  // 🔁 Declare before branching
 
          CObject *baseObj = pZones.At(i);
+/*
+         
          if (baseObj != NULL && CheckPointer(baseObj) == POINTER_DYNAMIC) {
             origZone = (CZone *)baseObj;  // Safe cast if all objects are CZone*
             // Optional: check attributes, log ID, etc.
          } else {
             Print("❌ Invalid or corrupted pointer at index ", i);
          }
+*/
+         origZone = dynamic_cast<CZone *>(baseObj);  // Safe cast if all objects are CZone*   
 
          if (origZone != NULL) {
             CZone *copyZone = new CZone();
