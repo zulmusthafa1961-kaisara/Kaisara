@@ -134,28 +134,25 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
 
       // 🔁 Step 2: Deep copy zones from pZones
       for (int i = 0; i < pZones.Total(); i++) {
-         CZone *origZone = NULL;  // 🔁 Declare before branching
-/*         
          CObject *baseObj = pZones.At(i);
-         if (baseObj != NULL && CheckPointer(baseObj) == POINTER_DYNAMIC) {
-            origZone = (CZone *)baseObj;  // Safe cast if all objects are CZone*
-            // Optional: check attributes, log ID, etc.
-         } else {
-            Print("❌ Invalid or corrupted pointer at index ", i);
-         }
-*/
-         origZone = (CZone *)pZones.At(i);
-         //origZone = dynamic_cast<CZone *>(baseObj);  // Safe cast if all objects are CZone*   
-         if (origZone != NULL && CheckPointer(origZone) == POINTER_DYNAMIC) {
-         //if (origZone != NULL) {
-            CZone *copyZone = new CZone();
-            copyZone.Assign(origZone);    // ✅ Safe and scoped correctly
-            regimeSlice.Add(copyZone);    // 👌 Memory ownership retained
-         } else {
-            Print("❌ Skipping zone at index ", i, " due to casting failure.");
-         }
-      }
 
+         if (baseObj == NULL || CheckPointer(baseObj) != POINTER_DYNAMIC) {
+            Print("❌ Invalid pointer or object at index ", i);
+            continue;
+         }
+
+         // 🔍 Confirm the object is actually a CZone
+         if (baseObj.ClassName() != "CZone") {
+            Print("❌ Object at index ", i, " is not a CZone (found ", baseObj.ClassName(), ")");
+            continue;
+         }
+
+         CZone *origZone = (CZone *)baseObj;  // ✅ Now we're confident it's safe
+
+         CZone *copyZone = new CZone();
+         copyZone.Assign(origZone);
+         regimeSlice.Add(copyZone);
+      }
 
       // 🧪 Step 3: Diagnostic check before passing
       Print("🧪 Checking regimeSlice integrity before SetSource");
