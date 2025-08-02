@@ -154,7 +154,9 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
             Print("❌ NULL inside regimeSlice at index ", j);
          else {
             CZone *zoneObj = (CZone *)z;
-            Print("✅ regimeSlice[", j, "] = Zone ID: ", zoneObj.Id());
+            //Print("✅ regimeSlice[", j, "] = Zone ID: ", zoneObj.Id());
+            Print("✅ regimeSlice[", j, "] = Zone: ", zoneObj.ToString());
+
          }
       }
 
