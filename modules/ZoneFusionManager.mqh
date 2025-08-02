@@ -137,7 +137,14 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
             regimeSlice.Add(zone);
       }
 
-      builder.SetSource(&regimeSlice);
+      //builder.SetSource(&regimeSlice);   //invalid pointer access
+      if (regimeSlice.Total() > 0 && &regimeSlice != NULL)
+         builder.SetSource(&regimeSlice);
+      else
+         Print("⚠️ regimeSlice is either empty or invalid.");
+
+
+
 
    }
 
