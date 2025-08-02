@@ -6,6 +6,7 @@
 class CZoneFusionManager
 {
 private:
+   CArrayObj regimeSlice;
    CZoneAnalyzer  analyzer;
    CStripBuilder *builder;
    CArrayObj      m_fusedZones;  // ✔ This holds the result of fusion
@@ -16,6 +17,7 @@ private:
 public:
   void Fuse(CArrayObj *pLoadedZones);
   CArrayObj *GetFusedZones();
+  CArrayObj *GetSlice() { return &regimeSlice; }
 
 public:
    void Setup(CStripBuilder *builderRef, int bars = 300)
@@ -197,11 +199,16 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
       CArrayObj *pZones = LoadRegimeZones(tf);
       if (pZones == NULL || pZones.Total() < 4) return;
 
-      CArrayObj sliced;
+      regimeSlice.Clear();
       for (int i = pZones.Total() - 4; i < pZones.Total(); i++)
-         sliced.Add(pZones.At(i));
+      {
+         CObject *zone = pZones.At(i);
+         if (zone != NULL)
+            regimeSlice.Add(zone);
+      }
 
-      builder.SetSource(&sliced); // 🎯 send to renderer
+      builder.SetSource(&regimeSlice);
+
    }
 
    void MergeHourEndZones()

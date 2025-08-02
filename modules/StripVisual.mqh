@@ -26,7 +26,18 @@ public:
    CStripVisual(const string prefix, const int subwindow = 1)
      : m_prefix(prefix), m_subwindow(subwindow) {}
 
-   void DrawBoxStrip(CStationaryRectangles4Box &boxObj,
+void RenderStrips(CArrayObj *stripList) {
+      for (int i = 0; i < stripList.Total(); i++) {
+         CStripVisual *strip = (CStripVisual *)stripList.At(i);
+         if (strip == NULL) continue;
+
+         CStationaryRectangles4Box box;
+         strip.DrawBoxStrip(box, /*left=*/10, strip.clr,
+                            strip.label, "Regime", "t_start", "t_end");
+      }
+   }  
+  
+     void DrawBoxStrip(CStationaryRectangles4Box &boxObj,
                      int left, color col,
                      string a, string b, string c, string d)
    {

@@ -108,6 +108,8 @@ void Dispatch(CArrayObj *zones, RegimeType regime) {
       return;
    }
 
+
+
    int total = zones.Total();
    PrintFormat("🟢 Dispatching %d zone(s) for regime: %s", total, EnumToString(regime));
 
