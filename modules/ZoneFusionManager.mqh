@@ -9,7 +9,7 @@ class CZoneFusionManager
 {
 private:
    CArrayObj regimeSlice;
-   CZoneAnalyzer  analyzer;
+   CZoneAnalyzer  *analyzer;
    CStripBuilder *builder;
    CArrayObj      m_fusedZones;  // ✔ This holds the result of fusion
    int            handle;
@@ -124,10 +124,21 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
       return analyzer.GetZones();    // 📦 return merged & tagged zones
    }
 
+
+ /*  
    void RefreshRegime(string tf)
    {
       CArrayObj *pZones = LoadRegimeZones(tf);
       if (pZones == NULL || pZones.Total() < 4) return;
+
+
+
+      if (!TransferZoneInfos(sourceZones, targetZones)) {
+         Print("🚫 No valid zones transferred — regimeSlice not updated.");
+         return;
+      }
+
+      Print("✅ Zone transfer successful. zones.Total() = ", this.zones.Total());
 
       // 🔁 Step 1: Prepare regimeSlice – clear old contents
       regimeSlice.Clear();
@@ -170,9 +181,47 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
 
       // 🚀 Step 4: Safe assignment to builder
       builder.SetSource(&regimeSlice);
-
-
    }
+*/
+void RefreshRegime(string tf)
+{
+   if (analyzer == NULL) {
+      Print("❌ No analyzer linked. Cannot proceed with regime refresh.");
+      return;
+   }
+
+   //const CArrayObj &sourceZones = analyzer.GetMergedZones();
+   CArrayObj *sourceZones = analyzer.GetMergedZones();
+
+   CArrayObj *zones = analyzer.GetZones();  // ✅ pointer assignment
+
+
+   if (!TransferZoneInfos(sourceZones, &this.regimeSlice)) {
+      Print("🚫 Zone transfer failed. Regime sync aborted.");
+      return;
+   }
+
+   CArrayObj *pZones = LoadRegimeZones(tf);
+   if (pZones == NULL || pZones.Total() < 4) return;
+
+   regimeSlice.Clear();
+
+   for (int i = 0; i < pZones.Total(); i++) {
+      CZone *orig = dynamic_cast<CZone *>(pZones.At(i));
+      if (!orig) {
+         Print("❌ Invalid or non-CZone object at index ", i);
+         continue;
+      }
+
+      CZone *copy = new CZone();
+      copy.Assign(orig);
+      regimeSlice.Add(copy);
+   }
+
+   Print("🧪 RegimeSlice loaded: ", regimeSlice.Total(), " zones");
+   builder.SetSource(&regimeSlice);
+}
+
 
    void MergeHourEndZones()
    {
