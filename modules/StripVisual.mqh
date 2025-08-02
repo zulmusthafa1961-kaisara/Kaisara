@@ -15,6 +15,7 @@ class CStripVisual : public CObject
 private:
    string m_prefix;
    int    m_subwindow;
+      int m_renderIndex;
 
 public: 
    string   label;
@@ -26,16 +27,31 @@ public:
    CStripVisual(const string prefix, const int subwindow = 1)
      : m_prefix(prefix), m_subwindow(subwindow) {}
 
-void RenderStrips(CArrayObj *stripList) {
-      for (int i = 0; i < stripList.Total(); i++) {
-         CStripVisual *strip = (CStripVisual *)stripList.At(i);
-         if (strip == NULL) continue;
+void SetIndex(int index) { m_renderIndex = index; }
+int  GetIndex()          { return m_renderIndex; }    
 
-         CStationaryRectangles4Box box;
-         strip.DrawBoxStrip(box, /*left=*/10, strip.clr,
-                            strip.label, "Regime", "t_start", "t_end");
-      }
-   }  
+void RenderToChart(bool rightAligned = false)
+{
+   int leftMargin;
+   int spacing = BOX_W + BOX_GAP;
+
+   if (rightAligned)
+   {
+      long chartWidth;
+      //leftMargin = ChartGetInteger(CHART_WIDTH_IN_PIXELS) - ((m_renderIndex + 1) * spacing);
+      leftMargin = ChartGetInteger(0, CHART_WIDTH_IN_PIXELS, 0, chartWidth) - ((m_renderIndex + 1) * spacing);
+   }
+   else
+   {
+      leftMargin = 10 + m_renderIndex * spacing;
+   }
+
+   CStationaryRectangles4Box box;
+   DrawBoxStrip(box, leftMargin, clr, label,
+                "Regime", TimeToString(t_start), TimeToString(t_end));
+}
+
+
   
      void DrawBoxStrip(CStationaryRectangles4Box &boxObj,
                      int left, color col,

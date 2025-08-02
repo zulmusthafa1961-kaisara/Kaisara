@@ -2,6 +2,8 @@
 #define __ZONEFUSIONMANAGER_MQH__
 
 #include "UnifiedRegimeModulesmqh.mqh"
+#include <Arrays/Array.mqh>
+
 
 class CZoneFusionManager
 {
@@ -14,10 +16,13 @@ private:
    string         currentRegime;
    int            preloadBars;
 
+   datetime fusedZones[];
+
 public:
   void Fuse(CArrayObj *pLoadedZones);
   CArrayObj *GetFusedZones();
   CArrayObj *GetSlice() { return &regimeSlice; }
+
 
 public:
    void Setup(CStripBuilder *builderRef, int bars = 300)
@@ -37,89 +42,14 @@ public:
    // [5] Render updated strips
 }
 */
-/*
-void UpdateZoneStrips(const double &zoneData[])
-{
-   if (ArraySize(zoneData) == 0)
-   {
-      Print("ZoneStrip Update skipped: Empty zoneData.");
-      return;
-   }
-
-   // Optional: Check bounds or expected format if zoneData is structured
-   // Example: if zoneData comes in pairs [start, end], validate pairs
-
-   int count = ArraySize(zoneData);
-   if (count % 2 != 0)
-   {
-      Print("ZoneStrip Update warning: Uneven data count — expected start/end pairs.");
-      return;
-   }
-
-   Print("ZoneStrip Update initiated with ", count / 2, " zone(s).");
-}
-*/
-/*
-void UpdateZoneStrips(const double &zoneData[])
-{
-   if (ArraySize(zoneData) == 0 || ArraySize(zoneData) % 2 != 0)
-   {
-      Print("ZoneStrip Update skipped due to invalid input.");
-      return;
-   }
-
-   // 🔄 Clear previous strip objects (e.g., graphical buffers, objects, etc.)
-   const string prefix = "ZoneStrip_";
-   int cleared = 0;
-
-   for (int i = ObjectsTotal() - 1; i >= 0; i--)
-   {
-      string name = ObjectName(i);
-      if (StringFind(name, prefix) == 0)
-      {
-         ObjectDelete(name);
-         cleared++;
-      }
-   }
-
-   Print("ZoneStrip cleared: ", cleared, " old visuals removed.");
-
-   // ✅ Ready for fresh render logic
-}
-*/
-/*
-void UpdateZoneStrips(const double &zoneData[])
-{
-   if (ArraySize(zoneData) == 0 || ArraySize(zoneData) % 2 != 0)
-   {
-      Print("ZoneStrip Update skipped due to invalid input.");
-      return;
-   }
-
-   const string prefix = "ZoneStrip_";
-   int cleared = 0;
-   long chart_id = ChartID();
-
-   for (int i = ObjectsTotal(chart_id) - 1; i >= 0; i--)
-   {
-      string name = ObjectName(chart_id, i);
-      if (StringFind(name, prefix) == 0)
-      {
-         if (ObjectDelete(chart_id, name))
-            cleared++;
-      }
-   }
-
-   Print("ZoneStrip cleared: ", cleared, " old visuals removed.");
-}
-*/
 
 int SortByStart(const CObject *a, const CObject *b)
 {
    const CZone *za = (const CZone*)a;
    const CZone *zb = (const CZone*)b;
-   if (za.start < zb.start) return -1;
-   if (za.start > zb.start) return 1;
+
+   if (za.GetStart() < zb.GetStart()) return -1;
+   if (za.GetStart() > zb.GetStart()) return 1;
    return 0;
 }
 
@@ -154,18 +84,18 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
       CZone *current = (CZone*)temp.At(i);
       if (merged.Total() == 0)
       {
-         merged.Add(new CZone(current.start, current.end));
+         merged.Add(new CZone(current.GetStart(), current.GetEnd()));
          continue;
       }
 
       CZone *last = (CZone*)merged.At(merged.Total() - 1);
-      if (current.start <= last.end)  // Overlap or touch
+      if (current.GetStart() <= last.GetEnd())  // Overlap or touch
       {
-         last.end = MathMax(last.end, current.end);
+         last.SetEnd(MathMax(last.GetEnd(), current.GetEnd()));
       }
       else
       {
-         merged.Add(new CZone(current.start, current.end));
+         merged.Add(new CZone(current.GetStart(), current.GetEnd()));
       }
    }
 
@@ -237,23 +167,18 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
 #endif
 
 
-/*
-  // Optionally: Sort or filter internal zone array post-fusion
 void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
   if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
 
-  for (int i = 0; i < zonesToFuse.Total(); ++i) {
-    //CZoneAnalyzer *zone = (CZoneAnalyzer *)zonesToFuse.At(i);
-    CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(zonesToFuse.At(i));
-    if (zone == NULL) continue;
+  //ArraySort(zonesToFuse, WHOLE_ARRAY, 0, MODE_ASCEND);  // Sort by t_start  
+  zonesToFuse.Sort(); //(CompareZonesByStart);
 
-    zone.MergeZones();  // 💡 Replaces MergeZone(zone)
-  }
-}
-*/
+// Raw plotting loop (already handled)
 
-void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
-  if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
+   // 💡 Add after raw fusion
+   if (builder != NULL)
+      builder.RenderFinalMergedStrips(&m_fusedZones);  
+
 
 for (int i = 0; i < zonesToFuse.Total(); ++i)
 {
@@ -297,3 +222,11 @@ CArrayObj* CZoneFusionManager::GetFusedZones() {
   return &m_fusedZones;
 }
 
+/*
+int CompareZonesByStart(CObject *a, CObject *b) {
+   CZone *zoneA = (CZone *)a;
+   CZone *zoneB = (CZone *)b;
+   return zoneA.TimeStart() < zoneB.TimeStart() ? -1 :
+          zoneA.TimeStart() > zoneB.TimeStart() ? 1 : 0;
+}
+*/

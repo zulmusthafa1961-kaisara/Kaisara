@@ -30,6 +30,16 @@ public:
         return (CStripBuilder *)builderMap.Get(key);
     }
 
+    void RenderAll(CArrayObj &arr, bool rightAligned = false)
+    {
+    for (int i = 0; i < arr.Total(); i++)
+    {
+        ((CStripVisual*) arr.At(i)).RenderToChart(rightAligned);
+    }
+    }
+
+
+
     void DispatchZones(CArrayObj &zones)
     {
         for(int i = 0; i < zones.Total(); i++)
