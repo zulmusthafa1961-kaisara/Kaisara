@@ -8,7 +8,38 @@ class CZoneCSV : public CRectInfo {
 
 private:
    int rect_count;
-      RegimeType local_regime_type;
+   RegimeType local_regime_type;
+   int renderIndex;
+   string renderLabel;
+
+public:
+   void SetRenderIndex(int index) {
+      renderIndex = index;
+   }
+   int GetRenderIndex() const {
+      return renderIndex;
+   }
+
+   void SetRenderLabel(string label) {
+      renderLabel = label;
+   }
+   string GetRenderLabel() const {
+      return renderLabel;
+   }
+
+   void SetRegime(RegimeType r) {
+      local_regime_type = r;
+   }
+   RegimeType GetRegime() const {
+      return local_regime_type;
+   }   
+
+public:   
+void Regime(RegimeType r) {
+   local_regime_type = r;
+}
+
+
 public:
    void SetRegimeType(RegimeType value) { local_regime_type = value; }  // { regime_type = value; }
    virtual string ClassName() const { return "CZoneCSV"; }

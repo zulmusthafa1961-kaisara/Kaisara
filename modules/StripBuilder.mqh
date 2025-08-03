@@ -1,15 +1,17 @@
 #ifndef STRIPBUILDER_MQH
 #define STRIPBUILDER_MQH
 
-#include "StripVisual.mqh"
+//#include "StripVisual.mqh"
 
 #include "UnifiedRegimeModulesmqh.mqh"
 #include <Arrays/ArrayObj.mqh>
 
+class CStripVisual; 
 class CStripBuilder : public CObject
 {
 
    private:
+   CStripVisual *renderer;
    CArrayObj *zones;
    RegimeType currentRegime;  // if used
 
@@ -39,21 +41,21 @@ private:
 
 public:   
 void RenderFinalMergedStrips(CArrayObj *fusedZones) {
-   for (int i = 0; i < fusedZones.Total(); i++) {
-      CZone *zone = (CZone*)fusedZones.At(i);
-      if (zone == NULL) continue;
+      static CStripDispatcher dispatcher;
 
-      double start = zone.GetStart();
-      double end   = zone.GetEnd();
-      RegimeType regime = zone.GetRegime();
-      color zoneColor = clrOrange;
+      for (int i = 0; i < fusedZones.Total(); i++) {
+         CZoneCSV *zone = (CZoneCSV*)fusedZones.At(i);
+         if (zone == NULL) continue;
 
-      if (regime == REGIME_SELL) zoneColor = clrTomato;
-      else if (regime == REGIME_BUY) zoneColor = clrLime;
+         zone.SetRenderIndex(i);
+         zone.SetRenderLabel("Regime");
 
-      zone.PlotZone((datetime)start, (datetime)end, zoneColor); // Typecast if needed
+         RegimeType regime = zone.GetRegime();
+         dispatcher.Dispatch(fusedZones, regime);
+         //renderer.RenderToChart(zone);  // ✅ Now valid
+         renderer.RenderToChart();  // ✅ Now valid
+      }
    }
-}
 
 
 void DispatchZones(CArrayObj *zoneList, RegimeType regime)

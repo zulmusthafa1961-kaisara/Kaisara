@@ -72,8 +72,32 @@ public:
 };
 
 #endif
-
+/*
 void CStripDispatcher::Dispatch(CArrayObj *zones, RegimeType regime) {
    // TODO: Implement how zones get processed — this is a placeholder
    PrintFormat("Dispatching %d zones for regime: %s", zones.Total(), EnumToString(regime));
+}
+*/
+void CStripDispatcher::Dispatch(CArrayObj *zones, RegimeType regime) {
+   PrintFormat("Dispatching %d zones for regime: %s", zones.Total(), EnumToString(regime));
+
+   for (int i = 0; i < zones.Total(); i++) {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone == NULL) continue;
+
+
+      zone.SetRenderIndex(i);
+      zone.SetRenderLabel("Regime");
+
+      // Log for debugging
+      PrintFormat("Zone #%d | %s [%s] | t_start=%s | t_end=%s | Price Range=%.2f - %.2f",
+                  i + 1,
+                  zone.regime_tag,
+                  zone.GetRegimeTypeName(),
+                  TimeToString(zone.t_start),
+                  TimeToString(zone.t_end),
+                  zone.price_low,
+                  zone.price_high);
+
+   }
 }

@@ -7,6 +7,7 @@
 //+------------------------------------------------------------------+
 #property strict
 
+
 #include "UnifiedRegimeModulesmqh.mqh"
 
 // CStripVisual must inherit from CObject
@@ -28,7 +29,14 @@ public:
      : m_prefix(prefix), m_subwindow(subwindow) {}
 
 void SetIndex(int index) { m_renderIndex = index; }
-int  GetIndex()          { return m_renderIndex; }    
+int  GetIndex()          { return m_renderIndex; }   
+
+
+/*
+void SetRenderer(CStripVisual *visual) {
+      renderer = visual;
+ }
+*/      
 
 void RenderToChart(bool rightAligned = false)
 {
