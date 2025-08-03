@@ -218,6 +218,20 @@ void RefreshRegime(string tf)
       regimeSlice.Add(copy);
    }
 
+  // 🧪 Step 3: Diagnostic check before passing
+      Print("🧪 Checking regimeSlice integrity before SetSource");
+      for (int j = 0; j < regimeSlice.Total(); j++) {
+         CObject *z = regimeSlice.At(j);
+         if (z == NULL)
+            Print("❌ NULL inside regimeSlice at index ", j);
+         else {
+            CZone *zoneObj = (CZone *)z;
+            //Print("✅ regimeSlice[", j, "] = Zone ID: ", zoneObj.Id());
+            Print("✅ regimeSlice[", j, "] = Zone: ", zoneObj.ToString());
+
+         }
+      }   
+
    Print("🧪 RegimeSlice loaded: ", regimeSlice.Total(), " zones");
    builder.SetSource(&regimeSlice);
 }
