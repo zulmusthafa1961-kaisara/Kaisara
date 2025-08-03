@@ -21,6 +21,11 @@ public:
    void AddZone(CZoneInfo *zone);
    void Refresh();
 
+
+void SetRenderer(CStripVisual *visual) {
+      renderer = visual;
+ }   
+
 private:
    // Labeling + color logic
    static CStripVisual *ConvertToStripVisual(string timeframePrefix, string regimeTag, RegimeType regimeType, datetime t_start, datetime t_end) {

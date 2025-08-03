@@ -31,13 +31,7 @@ public:
 void SetIndex(int index) { m_renderIndex = index; }
 int  GetIndex()          { return m_renderIndex; }   
 
-
-/*
-void SetRenderer(CStripVisual *visual) {
-      renderer = visual;
- }
-*/      
-
+   
 void RenderToChart(bool rightAligned = false)
 {
    int leftMargin;
