@@ -38,31 +38,6 @@ private:
    }
 
 public:   
-/*
-void RenderFinalMergedStrips(CArrayObj *fusedZones) {
-   for (int i = 0; i < fusedZones.Total(); i++) {
-      CZone *zone = (CZone*)fusedZones.At(i);
-      if (zone == NULL) continue;
-      // 🖌 Final color logic, width, layering?
-  
-      //PlotZone(zone.start, zone.end, clrDeepSkyBlue);
-      if (zone != NULL)
-      {
-         datetime start = zone.GetStartTime(i);
-         datetime end = zone.GetEndTime(i);
-         color zoneColor = clrOrange;
-
-         RegimeType regime = zone.GetRegimeType(i);
-         if (regime == REGIME_SELL)
-            zoneColor = clrTomato;
-         else if (regime == REGIME_BUY)
-            zoneColor = clrLime;
-
-         zone.PlotZone(start, end, zoneColor);
-      }
-   }
-}
-*/
 void RenderFinalMergedStrips(CArrayObj *fusedZones) {
    for (int i = 0; i < fusedZones.Total(); i++) {
       CZone *zone = (CZone*)fusedZones.At(i);
