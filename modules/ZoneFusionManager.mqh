@@ -264,6 +264,7 @@ void RefreshRegime(string tf)
 
 
 void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
+  Print(__FUNCTION__ + " Fuse() in process ...  zonesToFuse.Sort() ");
   if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
 
   //ArraySort(zonesToFuse, WHOLE_ARRAY, 0, MODE_ASCEND);  // Sort by t_start  
@@ -307,7 +308,7 @@ for (int i = 0; i < zonesToFuse.Total(); ++i)
       zoneColor = clrLime;
 
    string label = "RAWZONE_" + IntegerToString(i);
-   zone.PlotZone(start, end, zoneColor);  // ✅ dispatch directly via zone instance
+   //zone.PlotZone(start, end, zoneColor);  // ✅ dispatch directly via zone instance
 }
 
 
@@ -315,7 +316,8 @@ for (int i = 0; i < zonesToFuse.Total(); ++i)
 
 
 CArrayObj* CZoneFusionManager::GetFusedZones() {
-  return &m_fusedZones;
+   Print(__FUNCTION__ + " GetFusedZones() in process ... it just returns &m_fusedZones");
+   return &m_fusedZones;
 }
 
 /*

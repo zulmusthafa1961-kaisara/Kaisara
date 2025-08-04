@@ -34,6 +34,8 @@ int  GetIndex()          { return m_renderIndex; }
    
 void RenderToChart(bool rightAligned = false)
 {
+   Print(__FUNCTION__ + " RenderToChart() in process ...");
+
    int leftMargin;
    int spacing = BOX_W + BOX_GAP;
 

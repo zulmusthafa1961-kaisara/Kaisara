@@ -48,6 +48,7 @@ public:
 void RenderFinalMergedStrips(CArrayObj *fusedZones) {
       static CStripDispatcher dispatcher;
 
+      Print(__FUNCTION__ + " RenderFinalMergedStrips() in process ...");
       for (int i = 0; i < fusedZones.Total(); i++) {
          CZoneCSV *zone = (CZoneCSV*)fusedZones.At(i);
          if (zone == NULL) continue;
@@ -99,7 +100,9 @@ public:
    }
 
    void SetSource(CArrayObj *sourceZones) {
-    zones = sourceZones;
+      Print(__FUNCTION__ + " SetSource() in process ...it just assign: zones = sourceZones"); 
+      
+      zones = sourceZones;
 }
 
 
@@ -215,7 +218,9 @@ void CStripBuilder::Build() {
 }
 */
 
-void CStripBuilder::Build() {
+void CStripBuilder::Build() {   // BUGGY BECAUSE IT DOES LoadZonesFromEmbeddedCSV() !
+   
+   Print(__FUNCTION__ + " Build() in process ...");
    RegimeType regime = GetActiveRegime();
 
    zones = LoadZonesFromEmbeddedCSV();  // Uses embedded resource-based loader
