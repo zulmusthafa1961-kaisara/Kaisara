@@ -198,6 +198,11 @@ void RefreshRegime(string tf)
 
    CArrayObj *sourceZones = analyzer.GetMergedZones();
 */
+   if (pZoneCSV == NULL) {
+      Print("❌ No pZoneCSV linked. Cannot proceed with regime refresh.");
+      return;
+   }
+
    CArrayObj *sourceZones = pZoneCSV.GetMergedZones();
 
    CArrayObj *zones = analyzer.GetZones();  // ✅ pointer assignment
