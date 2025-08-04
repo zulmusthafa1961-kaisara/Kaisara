@@ -198,7 +198,7 @@ void RefreshRegime(string tf)
 
    CArrayObj *sourceZones = analyzer.GetMergedZones();
 */
-   CArrayObj *sourceZones = analyzer.GetMergedZones();
+   CArrayObj *sourceZones = pZoneCSV.GetMergedZones();
 
    CArrayObj *zones = analyzer.GetZones();  // ✅ pointer assignment
 
