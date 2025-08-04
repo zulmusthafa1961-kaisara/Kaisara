@@ -12,6 +12,18 @@ private:
    int renderIndex;
    string renderLabel;
 
+//copied from CZoneAnalyzer
+private:
+   //CArrayObj rects;
+   //CArrayObj zones;
+   CArrayObj mergedZones;  
+   string prefix;
+
+public:   
+   CArrayObj *GetMergedZones() {
+      return &this.mergedZones;
+   }   
+
 public:
    void SetRenderIndex(int index) {
       renderIndex = index;

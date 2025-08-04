@@ -10,6 +10,8 @@ class CZoneFusionManager
 private:
    CArrayObj regimeSlice;
    CZoneAnalyzer  *analyzer;
+   CZoneCSV *pZoneCSV;
+
    CStripBuilder *builder;
    CArrayObj      m_fusedZones;  // ✔ This holds the result of fusion
    int            handle;
@@ -191,8 +193,11 @@ void RefreshRegime(string tf)
       Print("❌ No analyzer linked. Cannot proceed with regime refresh.");
       return;
    }
-*/
+
    //const CArrayObj &sourceZones = analyzer.GetMergedZones();
+
+   CArrayObj *sourceZones = analyzer.GetMergedZones();
+*/
    CArrayObj *sourceZones = analyzer.GetMergedZones();
 
    CArrayObj *zones = analyzer.GetZones();  // ✅ pointer assignment
