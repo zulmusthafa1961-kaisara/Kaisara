@@ -185,11 +185,13 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
 */
 void RefreshRegime(string tf)
 {
+  // skipped temporarily
+   /*
    if (analyzer == NULL) {
       Print("❌ No analyzer linked. Cannot proceed with regime refresh.");
       return;
    }
-
+*/
    //const CArrayObj &sourceZones = analyzer.GetMergedZones();
    CArrayObj *sourceZones = analyzer.GetMergedZones();
 
