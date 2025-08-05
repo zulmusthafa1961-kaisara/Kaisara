@@ -284,7 +284,7 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
    for (int i = 0; i < zonesToFuse.Total(); ++i) {
       CZoneCSV *zoneCsv = dynamic_cast<CZoneCSV*>(zonesToFuse.At(i));
       if (zoneCsv == NULL) {
-         Print(" ⚠️ Prior zonesToFuse.Sort(): Skipping non-CZoneCSV object(s) at index ", i);
+         Print(" ⚠️ Prior zonesToFuse.Sort(): Skipping non-CZoneCSV object at index ", i);
          continue;
       }
       Print("🔍 Prior zonesToFuse.Sort(): Zone type at index ", i, ": ", zoneCsv.ClassName());
@@ -300,7 +300,7 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
    for (int i = 0; i < zonesToFuse.Total(); ++i) {
       CZoneCSV *zoneCsv = dynamic_cast<CZoneCSV*>(zonesToFuse.At(i));
       if (zoneCsv == NULL) {
-         Print("⚠️ Skipping non-CZoneCSV object(s) at index ", i);
+         Print("⚠️ After zonesToFuse.Sort(); Skipping non-CZoneCSV object(s) at index ", i);
          continue;
       }
       Print("🔍 Zone type at index ", i, ": ", zoneCsv.ClassName());
