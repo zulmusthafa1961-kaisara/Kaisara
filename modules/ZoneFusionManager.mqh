@@ -128,7 +128,7 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
    }
 
   public:
-  void GetFusedZones(CArrayObj &zoneToFuse){m_fusedZones = zoneToFuse;}
+  void SetFusedZones(CArrayObj &zoneToFuse){m_fusedZones = zoneToFuse;}
  /*  
    void RefreshRegime(string tf)
    {
@@ -290,6 +290,8 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
    if (builder != NULL)
       builder.RenderFinalMergedStrips(&m_fusedZones);  
 
+
+SetFusedZones(zonesToFuse);  // Store the fused zones for later use
 
 for (int i = 0; i < zonesToFuse.Total(); ++i)
 {
