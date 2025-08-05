@@ -302,7 +302,7 @@ for (int i = 0; i < zonesToFuse.Total(); ++i)
       continue;
    }
 
-   Print("🔍 Zone type at index ", i, ": ", obj.ClassName());
+   Print("🔍 Zone type at index ", i, ": ", obj.ClassName());   // invalid pointer access
 
    CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(obj);
    if (zone == NULL)
