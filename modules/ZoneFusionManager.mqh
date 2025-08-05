@@ -291,7 +291,7 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
       builder.RenderFinalMergedStrips(&m_fusedZones);  
 
 
-SetFusedZones(zonesToFuse);  // Store the fused zones for later use
+//SetFusedZones(zonesToFuse);  // Store the fused zones for later use
 
 for (int i = 0; i < zonesToFuse.Total(); ++i)
 {
@@ -304,12 +304,16 @@ for (int i = 0; i < zonesToFuse.Total(); ++i)
 
    Print("🔍 Zone type at index ", i, ": ", obj.ClassName());   // invalid pointer access
 
+   SetFusedZones(zonesToFuse);  // Store the fused zones for later use <---- added
+
    CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(obj);
    if (zone == NULL)
    {
       Print("⚠️ Skipping non-CZoneAnalyzer object(s) at index ", i);
       continue;
    }
+
+
 
    // ✅ Safe to use 'zone' here as a fully valid CZoneAnalyzer
 
