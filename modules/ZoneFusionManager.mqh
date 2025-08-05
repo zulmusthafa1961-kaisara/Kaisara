@@ -276,6 +276,30 @@ void RefreshRegime(string tf)
 
 #endif
 
+void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
+   Print(__FUNCTION__ + " Fuse() in process ...  zonesToFuse.Sort() ");
+   if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
+
+   zonesToFuse.Sort();
+
+   SetFusedZones(zonesToFuse);  // ✅ Important: before any downstream usage
+
+   if (builder != NULL)
+      builder.RenderFinalMergedStrips(&m_fusedZones);  // ✅ Now safe
+
+   for (int i = 0; i < zonesToFuse.Total(); ++i) {
+      CZoneCSV *zoneCsv = dynamic_cast<CZoneCSV*>(zonesToFuse.At(i));
+      if (zoneCsv == NULL) {
+         Print("⚠️ Skipping non-CZoneCSV object(s) at index ", i);
+         continue;
+      }
+      Print("🔍 Zone type at index ", i, ": ", zoneCsv.ClassName());
+   }
+}
+
+
+
+/*
 
 void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
   Print(__FUNCTION__ + " Fuse() in process ...  zonesToFuse.Sort() ");
@@ -287,8 +311,8 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
 // Raw plotting loop (already handled)
 
    // 💡 Add after raw fusion
-   if (builder != NULL)
-      builder.RenderFinalMergedStrips(&m_fusedZones);  
+   if (builder != NULL)                                    // WHAT IS THIS FOR; HERE ?
+      builder.RenderFinalMergedStrips(&m_fusedZones);      // WHAT IS THIS FOR; HERE ? 
 
 
 //SetFusedZones(zonesToFuse);  // Store the fused zones for later use
@@ -302,20 +326,33 @@ for (int i = 0; i < zonesToFuse.Total(); ++i)
       continue;
    }
 
+
+SetFusedZones(zonesToFuse);  // Store the fused zones for later use
+
+CZoneCSV *zoneCsv = dynamic_cast<CZoneCSV*>(obj);
+if (zoneCsv == NULL) {
+    Print("⚠️ Skipping non-CZoneCSV object(s) at index ", i);
+    continue;
+}
+Print("🔍 Zone type at index ", i, ": ", zoneCsv.ClassName());
+
+ 
+CZoneAnalyzer *zoneAnalyzer = dynamic_cast<CZoneAnalyzer*>(obj);
+if (zoneAnalyzer == NULL) {
+    Print("⚠️ Skipping non-CZoneAnalyzer object(s) at index ", i);
+    continue;
+}
+Print("🔍 Zone type at index ", i, ": ", zoneAnalyzer.ClassName());
+
+
    Print("🔍 Zone type at index ", i, ": ", obj.ClassName());   // invalid pointer access
 
-   SetFusedZones(zonesToFuse);  // Store the fused zones for later use <---- added
 
-   CZoneAnalyzer *zone = dynamic_cast<CZoneAnalyzer *>(obj);
-   if (zone == NULL)
-   {
-      Print("⚠️ Skipping non-CZoneAnalyzer object(s) at index ", i);
-      continue;
-   }
+   //SetFusedZones(zonesToFuse);  // Store the fused zones for later use <---- added
 
 
 
-   // ✅ Safe to use 'zone' here as a fully valid CZoneAnalyzer
+   // ✅ Safe to use 'zone' here as a fully valid CZoneCSV or CZoneAnalyzer
 
    datetime start = zone.GetStartTime(i);     
    datetime end   = zone.GetEndTime(i);
@@ -333,7 +370,7 @@ for (int i = 0; i < zonesToFuse.Total(); ++i)
 
 
 }
-
+*/
 
 CArrayObj* CZoneFusionManager::GetFusedZones() {
    Print(__FUNCTION__ + " GetFusedZones() in process ... it just returns &m_fusedZones");
