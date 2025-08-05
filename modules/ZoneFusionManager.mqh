@@ -12,6 +12,7 @@ private:
    CZoneAnalyzer  *analyzer;
    CZoneCSV *pZoneCSV;
 
+
    CStripBuilder *builder;
    CArrayObj      m_fusedZones;  // ✔ This holds the result of fusion
    int            handle;
@@ -126,7 +127,8 @@ void MergeZones(const double &zoneData[], CArrayObj &merged)
       return analyzer.GetZones();    // 📦 return merged & tagged zones
    }
 
-
+  public:
+  void GetFusedZones(CArrayObj &zoneToFuse){m_fusedZones = zoneToFuse;}
  /*  
    void RefreshRegime(string tf)
    {
