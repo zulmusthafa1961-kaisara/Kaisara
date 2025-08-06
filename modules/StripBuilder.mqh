@@ -226,8 +226,8 @@ void CStripBuilder::Build() {   // BUGGY BECAUSE IT DOES LoadZonesFromEmbeddedCS
    zones = LoadZonesFromEmbeddedCSV();  // Uses embedded resource-based loader
    if (zones == NULL || zones.Total() == 0) return;
 
-   CStripDispatcher dispatcher;  // Make sure StripDispatcher is properly included
-   dispatcher.Dispatch(zones, regime);
+   //CStripDispatcher dispatcher;  // Make sure StripDispatcher is properly included
+   //dispatcher.Dispatch(zones, regime);
 
    delete zones;
    zones = NULL;  // Prevent dangling pointer
