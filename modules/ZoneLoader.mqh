@@ -18,6 +18,23 @@ private:
    //CArrayObj zones;
    CArrayObj mergedZones;  
    string prefix;
+   string typeId; 
+
+   static int nextId;
+   int instanceId;   
+
+public:
+   string Fingerprint()
+   {
+      return prefix + "|" +
+             typeId + "|" +
+             IntegerToString(rect_count) + "|" +
+             EnumToString(local_regime_type) + "|" +
+             IntegerToString(renderIndex) + "|" +
+             renderLabel;
+   }
+
+string GetType() { return typeId; }
 
 public:   
    CArrayObj *GetMergedZones() {
@@ -51,13 +68,21 @@ void Regime(RegimeType r) {
    local_regime_type = r;
 }
 
+public:
+   CZoneCSV() { 
+      instanceId = nextId++;
+      isFromCSV = true; 
+      typeId = "CSV";
+   }
+
+   // Override ClassName for type identification
 
 public:
    void SetRegimeType(RegimeType value) { local_regime_type = value; }  // { regime_type = value; }
-   virtual string ClassName() const { return "CZoneCSV"; }
+   virtual string ClassName() const { return "CZoneCSV"; }   
    bool isFromCSV;
    void SetRectCount(int value) { rect_count = value; }
-   CZoneCSV() { isFromCSV = true; }
+
    int GetRectCount() const {return rect_count;}
 
    
@@ -84,9 +109,7 @@ string GetRegimeTypeName() {
    }
 }
 
-
-
-   
+  
    void DrawStrip(datetime currentTime) {
       if (t_start > currentTime || t_end < currentTime) return;
    
@@ -97,6 +120,7 @@ string GetRegimeTypeName() {
 
    }
 };
+int CZoneCSV::nextId = 0;
 
 
 /*
@@ -212,7 +236,6 @@ inline CZoneCSV *CreateMergedZone(datetime t_start, datetime t_end,
 }
 
 #endif 
-
 
 /*
 color GetRegimeColor(int type) {
