@@ -4,7 +4,7 @@
 #include "UnifiedRegimeModulesmqh.mqh"
 #include <Arrays/Array.mqh>
 
-
+//extern int slicePercent;
 class CZoneFusionManager
 {
 private:
@@ -280,7 +280,8 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
    Print(__FUNCTION__ + " Fuse() in process ...  zonesToFuse.Sort() ");
    if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
 
-
+// logging every zones which is flooding Journal tab
+/*
    for (int i = 0; i < zonesToFuse.Total(); ++i) {
       CZoneCSV *zoneCsv = dynamic_cast<CZoneCSV*>(zonesToFuse.At(i));
       if (zoneCsv == NULL) {
@@ -289,14 +290,22 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
       }
       Print("🔍 Prior zonesToFuse.Sort(): Zone type at index ", i, ": ", zoneCsv.ClassName());
    }
+*/
+   int total = zonesToFuse.Total();
+   int slice = MathMax(1, total * slicePercent / 100); // Ensure at least 1 entry if total < 100
+
+   // avoid flooding journal tab by selective slice of zones for logging
+   LogZoneSlice(zonesToFuse, slice, "inside Fuse()");   
 
    zonesToFuse.Sort();
 
    SetFusedZones(zonesToFuse);  // ✅ Important: before any downstream usage
 
-   if (builder != NULL)
-      builder.RenderFinalMergedStrips(&m_fusedZones);  // ✅ Now safe
 
+   //if (builder != NULL)
+   //   builder.RenderFinalMergedStrips(&m_fusedZones);  // ✅ Now safe
+
+   /*
    for (int i = 0; i < zonesToFuse.Total(); ++i) {
       CZoneCSV *zoneCsv = dynamic_cast<CZoneCSV*>(zonesToFuse.At(i));
       if (zoneCsv == NULL) {
@@ -305,12 +314,10 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
       }
       Print("🔍 Zone type at index ", i, ": ", zoneCsv.ClassName());
    }
+   */   
 }
 
-
-
 /*
-
 void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
   Print(__FUNCTION__ + " Fuse() in process ...  zonesToFuse.Sort() ");
   if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
@@ -395,3 +402,17 @@ int CompareZonesByStart(CObject *a, CObject *b) {
           zoneA.TimeStart() > zoneB.TimeStart() ? 1 : 0;
 }
 */
+
+void LogZoneSlice(CArrayObj *zones, int slice, string label = "") {
+   int total = zones.Total();
+   for (int i = 0; i < slice && i < total; ++i) {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone != NULL)
+         PrintFormat("🔍 [%s HEAD] Zone[%d]: %s", label, i, zone.Fingerprint());
+   }
+   for (int i = total - slice; i < total; ++i) {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone != NULL)
+         PrintFormat("🔍 [%s TAIL] Zone[%d]: %s", label, i, zone.Fingerprint());
+   }
+}
