@@ -416,3 +416,26 @@ void LogZoneSlice(CArrayObj *zones, int slice, string label = "") {
          PrintFormat("🔍 [%s TAIL] Zone[%d]: %s", label, i, zone.Fingerprint());
    }
 }
+                           
+
+void LogZoneTypeSlice(CArrayObj *zones, int slice, string label = "") {
+   //CObject *obj = pFusedZones.At(i);
+   //if (obj == NULL)
+   //{
+   //   Print("⚠️ NULL pointer at index ", i);
+   //   continue;
+   //}
+   //string typeName = obj.ClassName();
+   int total = zones.Total();
+   for (int i = 0; i < slice && i < total; ++i) {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      string typeName = zone.ClassName();
+      if (zone != NULL)
+         PrintFormat("🔍 [%s HEAD] Zone[%d] Type: %s", label, i, typeName);
+   }
+   for (int i = total - slice; i < total; ++i) {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone != NULL)
+         PrintFormat("🔍 [%s TAIL] Zone[%d]: %s", label, i, zone.Fingerprint());
+   }
+}
