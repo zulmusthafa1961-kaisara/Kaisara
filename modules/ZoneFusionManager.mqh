@@ -295,7 +295,7 @@ void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
    int slice = MathMax(1, total * slicePercent / 100); // Ensure at least 1 entry if total < 100
 
    // avoid flooding journal tab by selective slice of zones for logging
-   LogZoneSlice(zonesToFuse, slice, "inside Fuse()");   
+   //LogZoneSlice(zonesToFuse, slice, "inside Fuse()");   
 
    zonesToFuse.Sort();
 
