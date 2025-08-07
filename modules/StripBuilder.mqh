@@ -59,8 +59,9 @@ void RenderFinalMergedStrips(CArrayObj *fusedZones) {
          RegimeType regime = zone.GetRegime();
          //dispatcher.Dispatch(fusedZones, regime);
          //renderer.RenderToChart(zone);  // ✅ Now valid
-         renderer.RenderToChart();  // ✅ Now valid
+         //renderer.RenderToChart();  // ✅ Now valid
       }
+      renderer.RenderToChart();  // ✅ Now valid  RENDER ONCE ONLY
    }
 
 
