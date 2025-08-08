@@ -23,6 +23,13 @@ private:
    static int nextId;
    int instanceId;   
 
+   public:   
+   //double price_top, price_bottom;
+   //double price_high, price_low;
+
+public:
+   //using CRectInfo::Assign;  // ✅ Unhide base method
+
 public:
    //datetime t_start;
    //datetime t_end;
@@ -30,6 +37,22 @@ public:
    int zoneID;
    // Add other relevant fields...
 
+   virtual string ToString() const override
+     {
+      return "Zone[" + (string)regime + "] " +
+             DoubleToString(price_low, 5) + " → " +
+             DoubleToString(price_high, 5) + " @ " +
+             TimeToString(t_start);
+     }   
+
+/*)
+   virtual CZoneCSV *Clone() override
+     {
+      CZoneCSV *copy = new CZoneCSV;
+      copy.Assign(this);  // ✅ 'this' is a pointer
+      return copy;
+     }
+*/
    void Assign(CZoneCSV *other)
    {
       if (other == NULL) return;

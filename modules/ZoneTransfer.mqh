@@ -4,12 +4,13 @@
 #ifndef __ZONE_TRANSFER__
 #define __ZONE_TRANSFER__
 
-#include <Arrays\ArrayObj.mqh>
+#include <Arrays/ArrayObj.mqh>
 //#include "CZoneCSV.mqh"
 #include "ZoneInfo.mqh"
 #include "UnifiedRegimeModulesmqh.mqh"
 
 
+class CZoneContainer;
 
 namespace ZoneTransfer
 {
@@ -21,6 +22,39 @@ namespace ZoneTransfer
       // Extend with more types as needed
       return NULL;
    }
+
+/*
+void TransferLastNZones(CArrayObj &src, CZoneContainer &dst, int count, string tag, bool clone)
+  {
+   CArrayObj *target = dst.GetRaw();
+   int start = MathMax(0, src.Total() - count);
+
+   for(int i = start; i < src.Total(); i++)
+     {
+      CZone *zone = (CZone *)src.At(i);
+      if(zone == NULL) continue;
+
+      //CZone *copied = clone ? zone.Clone() : zone;
+      CZone *copied = zone;
+      if(clone && zone != NULL)
+         copied = zone->Clone();
+
+      //copied.SetTag(tag);
+      //copied.SetTimestamp(TimeCurrent());  // Optional: add timestamp
+      target.Add(copied);
+     }
+  }
+
+  */
+void TransferLastNZones(CZoneContainer &src, CZoneContainer &dst, int count) {
+  int total = src.Total();
+  for (int i = total - count; i < total; i++) {
+    dst.Add(src.Get(i)); // No cloning yet
+  }
+}
+
+
+
 
    // Polymorphic zone transfer
    bool Transfer(const CArrayObj &src, CArrayObj &dest, const string expectedType, bool verbose = true)
