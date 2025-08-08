@@ -38,12 +38,13 @@ public:
    // Add other relevant fields...
 
    virtual string ToString() const override
-     {
-      return "Zone[" + (string)regime + "] " +
-             DoubleToString(price_low, 5) + " → " +
-             DoubleToString(price_high, 5) + " @ " +
-             TimeToString(t_start);
-     }   
+{
+   return "Zone[" + IntegerToString(regime) + "] " +
+          DoubleToString(price_low, 5) + " → " +
+          DoubleToString(price_high, 5) + " @ " +
+          TimeToString(t_start) +
+          TimeToString(t_end);
+} 
 
 /*)
    virtual CZoneCSV *Clone() override
