@@ -135,8 +135,8 @@ CArrayObj *GetLastNZones(CArrayObj *source, int count)
    CArrayObj *DispatchedZones = new CArrayObj;
    TransferZoneInfos(*slice, *DispatchedZones, false);
 
-   delete validZones;
-   delete slice;
+   //delete validZones;
+   //delete slice;
 
    return DispatchedZones;
 }
