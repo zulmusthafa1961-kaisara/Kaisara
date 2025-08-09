@@ -182,7 +182,7 @@ int CZoneCSV::nextId = 0;
 
 inline CZoneCSV *CreateMergedZone(datetime start, datetime end,
                                   double price_low, double price_high,
-                                  int rect_count, string regime_tag, string regime_type_s) {
+                                  int rect_count, string regime_tag, string regime_type_s, int csv_index) {
    CZoneCSV *zone = new CZoneCSV();
    if (zone == NULL) return NULL;
 
@@ -195,7 +195,7 @@ inline CZoneCSV *CreateMergedZone(datetime start, datetime end,
    
    RegimeType rtype = MapRegimeType(regime_type_s);
    zone.SetRegimeType(rtype);   // ADD THIS TO RESOLVE INCORRECT ACCESS OF REGIME TYPE.     
-   
+   zone.csv_index = csv_index;  // ✅ Store original CSV row index
    //PrintFormat("DEBUG: Within CreateMergedZone zone with tag='%s', regime-str type='%s', regime-enum type= %s", regime_tag, regime_type_s, EnumToString(zone.GetRegimeType()));
 
    return zone;
@@ -239,7 +239,7 @@ CArrayObj *LoadZonesFromEmbeddedCSV() {
       string regime_type_s = parts[7];
 
       CZoneCSV *zone = CreateMergedZone(t_start, t_end, price_low, price_high,
-                                        rect_count, regime_tag, regime_type_s);
+                                        rect_count, regime_tag, regime_type_s,i);
       if (zone != NULL) _regimeZones.Add(zone);
    }
    return _regimeZones;
