@@ -3,6 +3,7 @@
 
 #include "UnifiedRegimeModulesmqh.mqh"
 
+/*
 void PrepareZoneDispatch(CArrayObj *fusedZones, CArrayObj &DispatchedZones, datetime lastClosedH1)
 {
    DispatchAudit(fusedZones, lastClosedH1); // 🔍 Audit before slicing
@@ -11,6 +12,43 @@ void PrepareZoneDispatch(CArrayObj *fusedZones, CArrayObj &DispatchedZones, date
    GetLastNZones(fusedZones, 4);
    TransferZoneInfos(slice, DispatchedZones);
 }
+*/
+void PrepareZoneDispatch(CArrayObj *sourceZones, CArrayObj *dispatchedZones, datetime lastClosedH1)
+{
+   if (sourceZones == NULL || sourceZones.Total() == 0)
+   {
+      Print("⚠️ PrepareZoneDispatch: sourceZones is empty");
+      return;
+   }
+
+   CArrayObj eligibleZones;
+   for (int i = 0; i < sourceZones.Total(); i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)sourceZones.At(i);
+      if (zone == NULL || CheckPointer(zone) != POINTER_DYNAMIC)
+         continue;
+
+      if (zone.t_end <= lastClosedH1)
+         eligibleZones.Add(zone);
+   }
+
+   int totalEligible = eligibleZones.Total();
+   if (totalEligible == 0)
+   {
+      Print("⚠️ No eligible zones to dispatch");
+      return;
+   }
+
+   int startIndex = MathMax(0, totalEligible - 4); // Get last 4 eligible zones
+   CArrayObj slice;
+   for (int i = startIndex; i < totalEligible; i++)
+      slice.Add(eligibleZones.At(i));
+
+   Print("📦 Dispatching ", slice.Total(), " eligible zones from index ", startIndex, " to ", totalEligible - 1);
+
+   TransferZoneInfos(slice, *dispatchedZones);
+}
+
 
 
 void DispatchAudit(CArrayObj &fusedZones, datetime lastClosedH1)
@@ -26,7 +64,10 @@ void DispatchAudit(CArrayObj &fusedZones, datetime lastClosedH1)
          continue;
       }
 
-      CZoneInfo *zone = (CZoneInfo *)obj;
+     // CZoneInfo *zone = (CZoneInfo *)obj; // <-- runtime err: incorrect casting of pointers
+                                            // because it assume  that obj is of type CZoneInfo
+      CZoneCSV *zone = (CZoneCSV *)obj;     // in reality , sourcezones (aka fusedZones) contains objects of type CZoneCSV
+
       string className = zone.ClassName();
       string regime = zone.GetRegimeTypeName();
       //string type = zone.type;
