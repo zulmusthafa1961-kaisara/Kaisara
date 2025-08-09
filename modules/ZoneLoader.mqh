@@ -35,6 +35,7 @@ public:
    //datetime t_end;
    int regime;
    int zoneID;
+   int csv_index;  // Original index from CSV
    // Add other relevant fields...
 
    virtual string ToString() const override

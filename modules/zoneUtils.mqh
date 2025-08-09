@@ -61,6 +61,29 @@ bool TransferZoneInfos(const CArrayObj &src, CArrayObj &dest, bool verbose = tru
    return dest.Total() > 0;
 }
 
+// dedicated to CSV zones
+bool TransferCSVZones(const CArrayObj &src, CArrayObj &dest, bool verbose = true)
+{
+   dest.Clear();
+   for (int i = 0; i < src.Total(); i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)src.At(i);
+      if (zone == NULL || CheckPointer(zone) != POINTER_DYNAMIC)
+      {
+         if (verbose) Print("❌ Skipped invalid pointer at index ", i);
+         continue;
+      }
+
+      CZoneCSV *clone = new CZoneCSV();
+      clone.Assign(zone); // Or clone.Copy(zone) if you prefer
+      dest.Add(clone);
+
+      if (verbose)
+         Print("✅ Transferred CSV zone ", i, " — ", zone.regime_tag);
+   }
+   return dest.Total() > 0;
+}
+
 
 /*
 CArrayObj *GetLastNZones(CArrayObj *source, int count)

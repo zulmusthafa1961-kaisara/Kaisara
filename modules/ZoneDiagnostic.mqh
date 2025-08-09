@@ -46,7 +46,37 @@ void PrepareZoneDispatch(CArrayObj *sourceZones, CArrayObj *dispatchedZones, dat
 
    Print("📦 Dispatching ", slice.Total(), " eligible zones from index ", startIndex, " to ", totalEligible - 1);
 
-   TransferZoneInfos(slice, *dispatchedZones);
+   //TransferZoneInfos(slice, *dispatchedZones);
+if (slice.Total() > 0)
+{
+   int totalEligible = slice.Total();
+   int start = MathMax(0, totalEligible - 4);
+   int end   = totalEligible - 1;
+
+   CZoneCSV *first = (CZoneCSV *)slice.At(0);
+   if (first != NULL && CheckPointer(first) == POINTER_DYNAMIC)
+      Print(TimeToString(first.t_start), "   📦 Dispatching ", slice.Total(), " eligible zones from index ", start, " to ", end);
+
+   // 🔍 Diagnostic loop: full fidelity logging
+   for (int i = 0; i < slice.Total(); i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)slice.At(i);
+      if (zone != NULL && CheckPointer(zone) == POINTER_DYNAMIC)
+      {
+         Print("📦 Zone[", i, "] CSVIndex=", zone.csv_index,
+               " | Start=", TimeToString(zone.t_start),
+               " | End=", TimeToString(zone.t_end),
+               " | High=", DoubleToString(zone.price_high, 5),
+               " | Low=", DoubleToString(zone.price_low, 5),
+               " | Regime=", zone.regime_tag);
+      }
+   }
+
+   TransferCSVZones(slice, *dispatchedZones);
+}
+
+
+
 }
 
 
