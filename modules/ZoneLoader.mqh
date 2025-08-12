@@ -10,14 +10,13 @@ private:
    int rect_count;
    RegimeType local_regime_type;
    int renderIndex;
-   string renderLabel;
+ 
 
 //copied from CZoneAnalyzer
 private:
-   //CArrayObj rects;
-   //CArrayObj zones;
    CArrayObj mergedZones;  
    string prefix;
+   string renderLabel;
    string typeId; 
 
    static int nextId;
@@ -29,6 +28,27 @@ private:
 
 public:
    //using CRectInfo::Assign;  // ✅ Unhide base method
+   string GetLabel()
+   {
+      return StringFormat("Zone %d [%s]", csv_index, regime_tag);
+   }
+
+   string GetPrefix() const
+   {
+      return prefix;
+   }
+
+
+   color GetColor()
+   {
+      switch (GetRegime())
+      {
+         case REGIME_BUY:  return clrLime;
+         case REGIME_SELL: return clrRed;
+         default:          return clrGray;
+      }
+   }
+
 
 public:
    //datetime t_start;
@@ -68,7 +88,7 @@ public:
    }   
 
 public:
-   string Fingerprint()
+   string fingerprint()
    {
       return prefix + "|" +
              typeId + "|" +
@@ -106,6 +126,14 @@ public:
    RegimeType GetRegime() const {
       return local_regime_type;
    }   
+
+color GetRegimeColor(RegimeType type) {
+   switch (type) {
+      case REGIME_BUY: return clrGreen;
+      case REGIME_SELL: return clrRed;
+      default: return clrGray;
+   }
+}   
 
 public:   
 void Regime(RegimeType r) {
@@ -153,17 +181,6 @@ string GetRegimeTypeName() {
    }
 }
 
-/*  
-   void DrawStrip(datetime currentTime) {
-      if (t_start > currentTime || t_end < currentTime) return;
-   
-      // Compose a unique name for the strip
-      string stripName = "ZoneStrip_" + TimeToString(t_start) + "_" + regime_tag;
-   
-      color regimeColor = GetRegimeColor(local_regime_type);
-
-   }
-*/
 void DrawStrip(datetime currentTime) {
    if (this.t_start > currentTime || this.t_end < currentTime)
       return;
@@ -246,13 +263,7 @@ CArrayObj *LoadZonesFromEmbeddedCSV() {
 }
 
 
-color GetRegimeColor(RegimeType type) {
-   switch (type) {
-      case REGIME_BUY: return clrGreen;
-      case REGIME_SELL: return clrRed;
-      default: return clrGray;
-   }
-}
+
 
 
 /*

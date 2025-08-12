@@ -28,7 +28,7 @@ void PrepareZoneDispatch(CArrayObj *sourceZones, CArrayObj *dispatchedZones, dat
       if (zone == NULL || CheckPointer(zone) != POINTER_DYNAMIC)
          continue;
 
-      if (zone.t_end <= lastClosedH1)
+      if (zone.t_start  <= lastClosedH1)
          eligibleZones.Add(zone);
    }
 

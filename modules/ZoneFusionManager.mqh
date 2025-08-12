@@ -247,7 +247,12 @@ void RefreshRegime(string tf)
       }   
 
    Print("🧪 RegimeSlice loaded: ", regimeSlice.Total(), " zones");
-   builder.SetSource(&regimeSlice);
+
+   int index = 0;  // or whatever slice you want
+   CRegimeSlice *slice = (CRegimeSlice *)regimeSlice.At(index);  // index = 0, or whatever slice you want
+   builder.SetSource(slice);
+
+   //builder.SetSource(&regimeSlice);
 }
 
 
@@ -268,7 +273,10 @@ void RefreshRegime(string tf)
       for (int i = fused.Total() - 4; i < fused.Total(); i++)
          recent.Add(fused.At(i));
 
-      builder.SetSource(&recent); // 🚀 unified fusion strip update
+      //builder.SetSource(&recent); // 🚀 unified fusion strip update
+      CRegimeSlice *fusedSlice = CRegimeSlice::FuseSlices(&recent);
+      builder.SetSource(fusedSlice);  // ✅ Now matches expected type
+
    }
 
    string ActiveRegime() { return currentRegime; }
@@ -408,12 +416,12 @@ void LogZoneSlice(CArrayObj *zones, int slice, string label = "") {
    for (int i = 0; i < slice && i < total; ++i) {
       CZoneCSV *zone = (CZoneCSV *)zones.At(i);
       if (zone != NULL)
-         PrintFormat("🔍 [%s HEAD] Zone[%d]: %s", label, i, zone.Fingerprint());
+         PrintFormat("🔍 [%s HEAD] Zone[%d]: %s", label, i, zone.fingerprint());
    }
    for (int i = total - slice; i < total; ++i) {
       CZoneCSV *zone = (CZoneCSV *)zones.At(i);
       if (zone != NULL)
-         PrintFormat("🔍 [%s TAIL] Zone[%d]: %s", label, i, zone.Fingerprint());
+         PrintFormat("🔍 [%s TAIL] Zone[%d]: %s", label, i, zone.fingerprint());
    }
 }
                            
@@ -436,6 +444,6 @@ void LogZoneTypeSlice(CArrayObj *zones, int slice, string label = "") {
    for (int i = total - slice; i < total; ++i) {
       CZoneCSV *zone = (CZoneCSV *)zones.At(i);
       if (zone != NULL)
-         PrintFormat("🔍 [%s TAIL] Zone[%d]: %s", label, i, zone.Fingerprint());
+         PrintFormat("🔍 [%s TAIL] Zone[%d]: %s", label, i, zone.fingerprint());
    }
 }

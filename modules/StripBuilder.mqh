@@ -7,6 +7,204 @@
 #include <Arrays/ArrayObj.mqh>
 
 class CStripVisual; 
+class CRegimeSlice;  // Forward declaration
+
+//Refactored Class Skeleton
+
+/*
+class CStripBuilder : public CObject
+{
+private:
+   CArrayObj *zones;
+   RegimeType currentRegime;
+   private:
+   CRegimeSlice *source;
+   CStripVisual *m_renderer;
+
+
+public:
+   void Build();               // 🔧 Builds strips from zones
+   void AddZone(CZoneInfo *zone);
+   void Refresh();            // 🔁 Redraws all zones
+   RegimeType GetActiveRegime();
+
+   void SetSource(CRegimeSlice *_source)
+   {
+      this.source = _source;
+   }
+
+public:
+   void SetRenderer(CStripVisual *renderer) {
+      m_renderer = renderer;
+   }
+
+   void DispatchStrip(const SZoneMeta &meta) {
+      if (m_renderer != NULL)
+         m_renderer.Render(meta);
+   }
+
+
+
+private:
+   void RenderZone(string timeframePrefix, string regimeTag, RegimeType regimeType, datetime t_start, datetime t_end, int index);
+};
+*/
+
+// integration with stateless
+class CStripBuilder : public CObject{
+private:
+   CStripVisual *m_renderer;
+
+private:
+   CArrayObj m_zones_csv;   // For H1 Tester mode
+   CArrayObj m_zones_info;  // For M5 and Live mode
+private:
+   CRegimeSlice *m_source;
+
+private:
+   CArrayObj m_zones;
+
+private:
+   int m_activeRegime;
+
+public:
+   int GetActiveRegime();
+   void SetActiveRegime(int regime);  // optional setter   
+
+public:
+   void SetRegimeSlice(CRegimeSlice *slice)
+   {
+      if (slice == NULL || CheckPointer(slice) != POINTER_DYNAMIC) return;
+      m_source = slice;
+   }
+
+   CRegimeSlice *Source() { return m_source; }
+
+public:
+   void Build();   
+   void RenderZone(CZoneCSV *zone); 
+   void DispatchZones(CArrayObj *zones, RegimeType regime);
+
+
+
+void SetSource(CArrayObj *zones)
+{
+   if (zones == NULL || zones.Total() == 0) return;
+
+   for (int i = 0; i < zones.Total(); i++)
+   {
+      CObject *obj = zones.At(i);
+      if (obj == NULL || CheckPointer(obj) != POINTER_DYNAMIC) continue;
+
+      string typeName = obj.ClassName();
+      if (typeName == "CZoneCSV")
+         AddZone((CZoneCSV *)obj);
+      else if (typeName == "CZoneInfo")
+         AddZone((CZoneInfo *)obj);
+   }
+}
+
+void SetSource(CRegimeSlice *slice)
+{
+   if (slice == NULL) return;
+   CArrayObj *zones = slice.GetZones();  // or however you access them
+   SetSource(zones);  // reuse the existing method
+}
+
+
+public:
+   void Refresh()
+   {
+      m_zones_csv.Clear();
+      m_zones_info.Clear();
+   }
+
+   void AddZone(CZoneCSV *zone)
+   {
+      if (zone == NULL || CheckPointer(zone) != POINTER_DYNAMIC) return;
+      m_zones_csv.Add(zone);
+   }
+
+   void AddZone(CZoneInfo *zone)
+   {
+      if (zone == NULL || CheckPointer(zone) != POINTER_DYNAMIC) return;
+      m_zones_info.Add(zone);
+   }      
+
+public:
+   void SetRenderer(CStripVisual *_renderer) {
+      m_renderer = _renderer;
+   }
+
+   void RenderFinalMergedStrips(CArrayObj *zones) {
+      if (m_renderer == NULL || zones == NULL) return;
+
+      for (int i = 0; i < zones.Total(); ++i) {
+         CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+         if (zone != NULL && CheckPointer(zone) == POINTER_DYNAMIC)
+            m_renderer.RenderStrip(zone);  // Stateless rendering
+      }
+   }
+};
+
+
+void CStripBuilder::Build()
+{
+   // Example: iterate over zones and render strips
+   for (int i = 0; i < m_zones.Total(); i++)
+   {
+      CObject *obj = m_zones.At(i);
+      if (obj == NULL || CheckPointer(obj) != POINTER_DYNAMIC) continue;
+
+      if (obj.ClassName() == "CZoneCSV")
+      {
+         CZoneCSV *zone = (CZoneCSV *)obj;
+         RenderZone(zone);  // your rendering logic
+      }
+   }
+}
+
+void CStripBuilder::RenderZone(CZoneCSV *zone)
+{
+   if (zone == NULL) return;
+
+   double priceLow = zone.price_low;
+   double priceHigh = zone.price_high;
+   datetime tStart = zone.t_start;
+   datetime tEnd = zone.t_end;
+
+   // Example rendering logic (replace with your own)
+   PrintFormat("Rendering zone: %.2f–%.2f from %s to %s",
+               priceLow, priceHigh,
+               TimeToString(tStart), TimeToString(tEnd));
+
+   // You could also call chart drawing functions here
+}
+
+int CStripBuilder::GetActiveRegime()
+{
+   return m_activeRegime;
+}
+
+void CStripBuilder::SetActiveRegime(int regime)
+{
+   m_activeRegime = regime;
+}
+
+void CStripBuilder::DispatchZones(CArrayObj *zones, RegimeType regime)
+{
+   for (int i = 0; i < zones.Total(); i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone == NULL) continue;
+
+      zone.SetRegime(regime);  // assuming this method exists
+      m_zones.Add(zone);       // or dispatch to chart, etc.
+   }
+}
+
+
+/*
 class CStripBuilder : public CObject
 {
 
@@ -28,6 +226,7 @@ void SetRenderer(CStripVisual *visual) {
 
 private:
    // Labeling + color logic
+  
    static CStripVisual *ConvertToStripVisual(string timeframePrefix, string regimeTag, RegimeType regimeType, datetime t_start, datetime t_end) {
       CStripVisual* sv = new CStripVisual(timeframePrefix, 1);
 
@@ -44,7 +243,21 @@ private:
       return sv;
    }
 
+// convert using stateless CStripVisual
+void RenderZone(string timeframePrefix, string regimeTag, RegimeType regimeType, datetime t_start, datetime t_end, int index)
+{
+   int durationMin = (int)((t_end - t_start) / 60);
+   string regimeLabel = MapRegimeLabel(regimeType);
+   color regimeColor  = MapRegimeColor(regimeType);
+
+   string label = StringFormat("%s-%s (%dm)", timeframePrefix, regimeLabel, durationMin);
+
+   CStripVisual renderer(timeframePrefix, 1);
+   renderer.RenderToChart(index, regimeColor, label, t_start, t_end);
+}
+
 public:   
+
 void RenderFinalMergedStrips(CArrayObj *fusedZones) {
       static CStripDispatcher dispatcher;
 
@@ -64,13 +277,40 @@ void RenderFinalMergedStrips(CArrayObj *fusedZones) {
       renderer.RenderToChart();  // ✅ Now valid  RENDER ONCE ONLY
    }
 
+//use this one   
+void RenderFinalMergedStrips(CArrayObj *fusedZones)
+{
+   Print(__FUNCTION__ + " RenderFinalMergedStrips() in process ...");
+
+   for (int i = 0; i < fusedZones.Total(); i++)
+   {
+      CZoneCSV *zone = (CZoneCSV*)fusedZones.At(i);
+      if (zone == NULL || CheckPointer(zone) != POINTER_DYNAMIC)
+      {
+         Print("⚠️ Skipping invalid zone at index ", i);
+         continue;
+      }
+
+      // Prepare rendering metadata
+      zone.SetRenderIndex(i);
+
+      string label = zone.GetLabel();       // e.g. "Zone 3 [BUY]"
+      color zoneColor = zone.GetColor();    // e.g. clrLime
+
+      PrintFormat("🖼️ Rendering Zone[%d]: %s | Color=%s", i, label, ColorToString(zoneColor));
+
+      // Render this zone
+      renderer.SetRenderIndex(i);  // if renderer tracks index
+      renderer.RenderToChart(zoneColor, label);
+   }
+}
+
 
 void DispatchZones(CArrayObj *zoneList, RegimeType regime)
 {
    static CStripDispatcher dispatcher;
    dispatcher.Dispatch(zoneList, regime);
 }
-
 
 
 public:
@@ -167,7 +407,7 @@ void Dispatch(CArrayObj *zones, RegimeType regime) {
    }
 }
 
-
+*/
 
 #endif
 /*
@@ -219,6 +459,8 @@ void CStripBuilder::Build() {
 }
 */
 
+
+/*
 void CStripBuilder::Build() {   // BUGGY BECAUSE IT DOES LoadZonesFromEmbeddedCSV() !
    
    Print(__FUNCTION__ + " Build() in process ...");
@@ -237,3 +479,4 @@ void CStripBuilder::Build() {   // BUGGY BECAUSE IT DOES LoadZonesFromEmbeddedCS
 RegimeType CStripBuilder::GetActiveRegime() {
    return currentRegime;
 }
+*/
