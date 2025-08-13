@@ -209,6 +209,7 @@ void CStripVisual::RenderRecentZones(CArrayObj *zones)
       return;
    }
 
+   LogRecentZoneDiagnostics(currentTime, validZones, currentFingerprintConcat, lastFingerprintConcat);
    lastFingerprintConcat = currentFingerprintConcat;
 
    // Step 3: Clear previous rendering
@@ -247,6 +248,45 @@ void CStripVisual::RenderRecentZones(CArrayObj *zones)
 
    delete validZones;
 }
+
+void LogRecentZoneDiagnostics(datetime currentTime,
+                              CArrayObj *validZones,
+                              string currentFingerprintConcat,
+                              string lastFingerprintConcat)
+{
+   Print("📍 Diagnostic: RenderRecentZones()");
+   Print("🕒 Current H1 candle close: ", TimeToString(currentTime, TIME_DATE | TIME_MINUTES));
+   Print("🔍 Current Fingerprint Concat: ", currentFingerprintConcat);
+   Print("🔍 Last Fingerprint Concat: ", lastFingerprintConcat);
+
+   if (validZones == NULL || validZones.Total() == 0)
+   {
+      Print("⚠️ No valid zones to render.");
+      return;
+   }
+
+   PrintFormat("🧪 Valid zones (t_start ≤ %s):", TimeToString(currentTime, TIME_DATE | TIME_MINUTES));
+   for (int i = 0; i < validZones.Total(); i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+
+      PrintFormat("  └─ Zone[%d] FP=%s Regime=%s Start=%s End=%s Low=%.2f High=%.2f",
+                  i,
+                  zone.fingerprint(),
+                  EnumToString(zone.GetRegime()),
+                  TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES),
+                  TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES),
+                  zone.price_low,
+                  zone.price_high);
+   }
+
+   if (currentFingerprintConcat == lastFingerprintConcat)
+      Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
+   else
+      Print("🆕 Zone composition changed. Proceeding with rendering.");
+}
+
 
 
 /*   
