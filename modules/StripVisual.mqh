@@ -172,6 +172,69 @@ public:
                    "Regime", TimeToString(t_start), TimeToString(t_end));
    }
 
+void CStripVisual::RenderRecentZones(CArrayObj *zones)
+{
+   if (zones == NULL || zones.Total() == 0) return;
+
+   static string lastFingerprintConcat = "";
+
+   int total = zones.Total();
+   int start = MathMax(0, total - 4);
+
+   string currentFingerprintConcat = "";
+
+   for (int i = start; i < total; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone == NULL) continue;
+
+      currentFingerprintConcat += zone.fingerprint();
+   }
+
+   if (currentFingerprintConcat == lastFingerprintConcat)
+   {
+      Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
+      return;
+   }
+
+   lastFingerprintConcat = currentFingerprintConcat;
+
+   // Clear previous rendering
+   CStationaryRectangles4Box box;
+   box.SetSubWindow(m_subwindow);
+   box.SetLeftMargin(LEFT_MARGIN);
+   box.SetBoxGap(BOX_GAP);
+   box.SetBoxDimensions(BOX_W, BOX_H);
+   box.SetTopMargin(TOP_MARGIN);
+   box.Initialize();
+   box.ClearBoxes();
+
+   // Render recent zones
+   int labelIndex = 0;
+   for (int i = start; i < total; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone == NULL) continue;
+
+      string label = "L" + IntegerToString(labelIndex);
+      string startStr = TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES);
+      string endStr   = TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES);
+      string priceStr = StringFormat("low = %.2f | high = %.2f", zone.price_low, zone.price_high);
+
+      color zoneColor = (zone.GetRegime() == REGIME_BUY) ? clrGreen : clrRed;
+
+      box.Create();
+      box.UpdateLabels(label, startStr, endStr, priceStr);
+      box.UpdateColors(zoneColor, zoneColor, zoneColor, zoneColor);
+
+      labelIndex++;
+   }
+
+   // Future: insert separator for M5 right strip
+   // box.DrawSeparator(STRIP_GAP);  // placeholder
+}
+
+
 private:
    // Stateless box drawing
    void DrawBoxStrip(CStationaryRectangles4Box &boxObj,

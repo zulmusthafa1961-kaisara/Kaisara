@@ -90,13 +90,16 @@ public:
 public:
    string fingerprint()
    {
-      return prefix + "|" +
-             typeId + "|" +
-             IntegerToString(rect_count) + "|" +
-             EnumToString(local_regime_type) + "|" +
-             IntegerToString(renderIndex) + "|" +
-             renderLabel;
+      return StringFormat("|CSV|%d|%s|%s|%s|%.2f|%.2f",
+                       csv_index,
+                       EnumToString(local_regime_type),
+                       TimeToString(t_start, TIME_DATE | TIME_MINUTES),
+                       TimeToString(t_end, TIME_DATE | TIME_MINUTES),
+                       price_low,
+                       price_high);
    }
+
+
 
 string GetType() { return typeId; }
 
