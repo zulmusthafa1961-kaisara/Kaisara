@@ -265,21 +265,28 @@ void LogRecentZoneDiagnostics(datetime currentTime,
       return;
    }
 
-   PrintFormat("🧪 Valid zones (t_start ≤ %s):", TimeToString(currentTime, TIME_DATE | TIME_MINUTES));
-   for (int i = 0; i < validZones.Total(); i++)
+   ///////////////////
+   int total = validZones.Total();
+   int start = MathMax(0, total - 4);
+
+   PrintFormat("🧪 Most recent %d valid zones (t_start ≤ %s):", total - start, TimeToString(currentTime, TIME_DATE | TIME_MINUTES));
+   for (int i = start; i < total; i++)
    {
       CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
       if (zone == NULL) continue;
 
       PrintFormat("  └─ Zone[%d] FP=%s Regime=%s Start=%s End=%s Low=%.2f High=%.2f",
-                  i,
-                  zone.fingerprint(),
-                  EnumToString(zone.GetRegime()),
-                  TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES),
-                  TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES),
-                  zone.price_low,
-                  zone.price_high);
+                     i,
+                     zone.fingerprint(),
+                     EnumToString(zone.GetRegime()),
+                     TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES),
+                     TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES),
+                     zone.price_low,
+                     zone.price_high);
    }
+
+   //////////////////
+
 
    if (currentFingerprintConcat == lastFingerprintConcat)
       Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
