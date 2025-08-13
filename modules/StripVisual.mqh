@@ -183,6 +183,23 @@ void CStripVisual::RenderRecentZones(CArrayObj *zones)
 
    string currentFingerprintConcat = "";
 
+   Print("🧪 Validating last 4 zones:");
+for (int i = start; i < total; i++)
+{
+   CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+   if (zone == NULL) continue;
+
+   PrintFormat("Zone[%d] FP=%s Regime=%s Start=%s End=%s Low=%.2f High=%.2f",
+               i,
+               zone.fingerprint(),
+               EnumToString(zone.GetRegime()),
+               TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES),
+               TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES),
+               zone.price_low,
+               zone.price_high);
+}
+
+
    for (int i = start; i < total; i++)
    {
       CZoneCSV *zone = (CZoneCSV *)zones.At(i);
@@ -191,6 +208,9 @@ void CStripVisual::RenderRecentZones(CArrayObj *zones)
       currentFingerprintConcat += zone.fingerprint();
    }
 
+   Print("🔍 Current Fingerprint Concat: ", currentFingerprintConcat);
+   Print("🔍 Last Fingerprint Concat: ", lastFingerprintConcat);
+   
    if (currentFingerprintConcat == lastFingerprintConcat)
    {
       Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
