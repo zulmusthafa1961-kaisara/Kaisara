@@ -172,7 +172,208 @@ public:
                    "Regime", TimeToString(t_start), TimeToString(t_end));
    }
 
+///////////////////////////////////////////////////
+// FilterRecentValidZones
+///////////////////////////////////////////////////
+CArrayObj *FilterRecentValidZones(CArrayObj *zones)
+{
+   if (zones == NULL || zones.Total() == 0)
+      return NULL;
 
+   datetime anchorTime = iTime(_Symbol, PERIOD_H1, 0); // Most recent H1 close
+   CArrayObj *filtered = new CArrayObj;
+
+   // Traverse from end to start to get most recent zones
+   for (int i = zones.Total() - 1; i >= 0 && filtered.Total() < 4; i--)
+   {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone == NULL) continue;
+
+      // Look-ahead filter: only include zones that start after H1 close
+      if (zone.t_start <= anchorTime)
+         filtered.Add(zone);
+   }
+
+   // Optional: restore chronological order
+   filtered.Sort(); // If available
+
+   return filtered;
+}
+
+
+//////////////////////////////////////////////////////
+// clean up rendering box   ; render once only
+//////////////////////////////////////////////////////
+void RenderRecentZones(CArrayObj *validZones)
+{
+   //  Step 1: uses validZones which already Filter zones by t_start ≤ currentTime 
+   
+   if (validZones == NULL || validZones.Total() < 4)
+      return;
+
+   string label[4], startStr[4], endStr[4], priceStr[4], regimeStr[4];
+   color zoneColor[4];
+
+
+   // Step 2: Collect all info from zones
+   for (int i = 0; i < 4; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+
+      label[i]     = "L" + IntegerToString(i);
+      startStr[i]  = TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES);
+      endStr[i]    = TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES);
+      priceStr[i]  = StringFormat("low = %.2f | high = %.2f", zone.price_low, zone.price_high);
+      regimeStr[i] = EnumToString(zone.GetRegime());
+
+      zoneColor[i] = clrGray;
+      if (zone.GetRegime() == REGIME_BUY)  zoneColor[i] = clrGreen;
+      else if (zone.GetRegime() == REGIME_SELL) zoneColor[i] = clrRed;
+   }
+
+   // Step 3: Fingerprint gating
+   static string lastFingerprintConcat = "";
+   string currentFingerprintConcat = "";
+
+   for (int i = 0; i < 4; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+      currentFingerprintConcat += zone.fingerprint();
+   }
+
+   datetime currentTime = iTime(_Symbol, PERIOD_H1, 0);  // Current H1 candle close
+   LogRecentZoneDiagnostics(currentTime, validZones, currentFingerprintConcat, lastFingerprintConcat);
+
+   if (currentFingerprintConcat == lastFingerprintConcat)
+   {
+      Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
+      return;
+   }
+
+   lastFingerprintConcat = currentFingerprintConcat;
+
+
+   // Step 4: Clear previous rendering
+   CStationaryRectangles4Box box;
+   box.SetSubWindow(m_subwindow);
+   box.SetLeftMargin(LEFT_MARGIN);
+   box.SetBoxGap(BOX_GAP);
+   box.SetBoxDimensions(BOX_W, BOX_H);
+   box.SetTopMargin(TOP_MARGIN);
+   box.Initialize();
+   box.ClearBoxes();
+
+   // Step 5: Render once
+   box.Create();
+   box.UpdateLabels(
+      label[0] + "\n" + startStr[0] + "\n" + endStr[0] + "\n" + priceStr[0] + "\n" + regimeStr[0],
+      label[1] + "\n" + startStr[1] + "\n" + endStr[1] + "\n" + priceStr[1] + "\n" + regimeStr[1],
+      label[2] + "\n" + startStr[2] + "\n" + endStr[2] + "\n" + priceStr[2] + "\n" + regimeStr[2],
+      label[3] + "\n" + startStr[3] + "\n" + endStr[3] + "\n" + priceStr[3] + "\n" + regimeStr[3]
+   );
+
+   box.UpdateColors(zoneColor[0], zoneColor[1], zoneColor[2], zoneColor[3]);
+
+   // Step 6: Clean up
+   delete validZones;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// working with several passes 
+///////////////////////////////////////////////////////////////////////////
+void CStripVisual::RenderRecentZonesWorkingButNotElegant(CArrayObj *zones)
+{
+   if (zones == NULL || zones.Total() == 0) return;
+
+   datetime currentTime = iTime(_Symbol, PERIOD_H1, 0);  // Current H1 candle close
+
+   // Step 1: Filter zones by t_start ≤ currentTime
+   CArrayObj *validZones = new CArrayObj;
+   for (int i = 0; i < zones.Total(); i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone == NULL) continue;
+      if (zone.t_start <= currentTime)
+         validZones.Add(zone);
+   }
+
+   int total = validZones.Total();
+   int start = MathMax(0, total - 4);
+
+   // Step 2: Fingerprint gating
+   static string lastFingerprintConcat = "";
+   string currentFingerprintConcat = "";
+
+   for (int i = start; i < total; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+      currentFingerprintConcat += zone.fingerprint();
+   }
+
+   LogRecentZoneDiagnostics(currentTime, validZones, currentFingerprintConcat, lastFingerprintConcat);
+
+   if (currentFingerprintConcat == lastFingerprintConcat)
+   {
+      Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
+      return;
+   }
+
+   lastFingerprintConcat = currentFingerprintConcat;
+
+   // Step 3: Clear previous rendering
+   CStationaryRectangles4Box box;
+   box.SetSubWindow(m_subwindow);
+   box.SetLeftMargin(LEFT_MARGIN);
+   box.SetBoxGap(BOX_GAP);
+   box.SetBoxDimensions(BOX_W, BOX_H);
+   box.SetTopMargin(TOP_MARGIN);
+   box.Initialize();
+   box.ClearBoxes();
+
+   // Step 4: Render filtered zones
+   int labelIndex = 0;
+    string label[4];
+    string startStr[4];
+    string endStr[4];
+    string priceStr[4];
+    string regimeStr[4];
+    color zoneColor[4];
+
+
+   for (int i = start; i < total; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+
+      label[i-start]     = "L" + IntegerToString(labelIndex);
+      startStr[i-start]  = TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES);
+      endStr[i-start]    = TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES);
+      priceStr[i-start]  = StringFormat("low = %.2f | high = %.2f", zone.price_low, zone.price_high);
+      regimeStr[i-start] = EnumToString(zone.GetRegime());
+
+      zoneColor[i-start] = clrGray;
+      if (zone.GetRegime() == REGIME_BUY) zoneColor[i-start] = clrGreen;
+      else if (zone.GetRegime() == REGIME_SELL) zoneColor[i-start] = clrRed;
+
+      box.Create();
+      box.UpdateLabels(label[0], startStr[0], endStr[0], priceStr[0] + " | " + regimeStr[0]);
+      box.UpdateColors(zoneColor[0], zoneColor[1], zoneColor[2], zoneColor[3]);
+
+      labelIndex++;
+   }
+      //box.Create();
+      //box.UpdateLabels(label, startStr, endStr, priceStr + " | " + regimeStr);
+      //box.UpdateColors(zoneColor, zoneColor, zoneColor, zoneColor);
+
+   delete validZones;
+}
+
+
+/*
+// already debugged but not elegant enough because renderining 4 passess
 void CStripVisual::RenderRecentZones(CArrayObj *zones)
 {
    if (zones == NULL || zones.Total() == 0) return;
@@ -203,13 +404,14 @@ void CStripVisual::RenderRecentZones(CArrayObj *zones)
       currentFingerprintConcat += zone.fingerprint();
    }
 
+   LogRecentZoneDiagnostics(currentTime, validZones, currentFingerprintConcat, lastFingerprintConcat);
+
    if (currentFingerprintConcat == lastFingerprintConcat)
    {
       Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
       return;
    }
 
-   LogRecentZoneDiagnostics(currentTime, validZones, currentFingerprintConcat, lastFingerprintConcat);
    lastFingerprintConcat = currentFingerprintConcat;
 
    // Step 3: Clear previous rendering
@@ -224,30 +426,42 @@ void CStripVisual::RenderRecentZones(CArrayObj *zones)
 
    // Step 4: Render filtered zones
    int labelIndex = 0;
+    string label[4];
+    string startStr[4];
+    string endStr[4];
+    string priceStr[4];
+    string regimeStr[4];
+    color zoneColor[4];
+
+
    for (int i = start; i < total; i++)
    {
       CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
       if (zone == NULL) continue;
 
-      string label     = "L" + IntegerToString(labelIndex);
-      string startStr  = TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES);
-      string endStr    = TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES);
-      string priceStr  = StringFormat("low = %.2f | high = %.2f", zone.price_low, zone.price_high);
-      string regimeStr = EnumToString(zone.GetRegime());
+      label[i-start]     = "L" + IntegerToString(labelIndex);
+      startStr[i-start]  = TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES);
+      endStr[i-start]    = TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES);
+      priceStr[i-start]  = StringFormat("low = %.2f | high = %.2f", zone.price_low, zone.price_high);
+      regimeStr[i-start] = EnumToString(zone.GetRegime());
 
-      color zoneColor = clrGray;
-      if (zone.GetRegime() == REGIME_BUY) zoneColor = clrGreen;
-      else if (zone.GetRegime() == REGIME_SELL) zoneColor = clrRed;
+      zoneColor[i-start] = clrGray;
+      if (zone.GetRegime() == REGIME_BUY) zoneColor[i-start] = clrGreen;
+      else if (zone.GetRegime() == REGIME_SELL) zoneColor[i-start] = clrRed;
 
       box.Create();
-      box.UpdateLabels(label, startStr, endStr, priceStr + " | " + regimeStr);
-      box.UpdateColors(zoneColor, zoneColor, zoneColor, zoneColor);
+      box.UpdateLabels(label[0], startStr[0], endStr[0], priceStr[0] + " | " + regimeStr[0]);
+      box.UpdateColors(zoneColor[0], zoneColor[1], zoneColor[2], zoneColor[3]);
 
       labelIndex++;
    }
+      //box.Create();
+      //box.UpdateLabels(label, startStr, endStr, priceStr + " | " + regimeStr);
+      //box.UpdateColors(zoneColor, zoneColor, zoneColor, zoneColor);
 
    delete validZones;
 }
+*/
 
 void LogRecentZoneDiagnostics(datetime currentTime,
                               CArrayObj *validZones,
