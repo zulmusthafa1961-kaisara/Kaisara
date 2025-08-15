@@ -1,0 +1,109 @@
+//+------------------------------------------------------------------+
+//| ZoneTransfer.mqh — Modular zone cloning and dispatch             |
+//+------------------------------------------------------------------+
+#ifndef __ZONE_TRANSFER__
+#define __ZONE_TRANSFER__
+
+#include <Arrays/ArrayObj.mqh>
+//#include "CZoneCSV.mqh"
+#include "ZoneInfo.mqh"
+#include "UnifiedRegimeModulesmqh.mqh"
+
+
+class CZoneContainer;
+
+namespace ZoneTransfer
+{
+   // Factory method for zone cloning
+   CObject *CreateZoneClone(const string typeName)
+   {
+      if (typeName == "CZoneCSV") return new CZoneCSV();
+      if (typeName == "CZoneInfo") return new CZoneInfo();
+      // Extend with more types as needed
+      return NULL;
+   }
+
+/*
+void TransferLastNZones(CArrayObj &src, CZoneContainer &dst, int count, string tag, bool clone)
+  {
+   CArrayObj *target = dst.GetRaw();
+   int start = MathMax(0, src.Total() - count);
+
+   for(int i = start; i < src.Total(); i++)
+     {
+      CZone *zone = (CZone *)src.At(i);
+      if(zone == NULL) continue;
+
+      //CZone *copied = clone ? zone.Clone() : zone;
+      CZone *copied = zone;
+      if(clone && zone != NULL)
+         copied = zone->Clone();
+
+      //copied.SetTag(tag);
+      //copied.SetTimestamp(TimeCurrent());  // Optional: add timestamp
+      target.Add(copied);
+     }
+  }
+
+  */
+void TransferLastNZones(CZoneContainer &src, CZoneContainer &dst, int count) {
+  int total = src.Total();
+  for (int i = total - count; i < total; i++) {
+    dst.Add(src.Get(i)); // No cloning yet
+  }
+}
+
+
+
+
+   // Polymorphic zone transfer
+   bool Transfer(const CArrayObj &src, CArrayObj &dest, const string expectedType, bool verbose = true)
+   {
+      dest.Clear();
+
+      for (int i = 0; i < src.Total(); i++)
+      {
+         CObject *obj = src.At(i);
+
+         if (obj != NULL && CheckPointer(obj) == POINTER_DYNAMIC && obj.ClassName() == expectedType)
+         {
+                        
+                        CObject *zoneSrc = obj;
+                        CObject *zoneClone = CreateZoneClone(expectedType);
+
+                        if (zoneClone != NULL)
+                        {
+                            if (expectedType == "CZoneCSV")
+                            {
+                                CZoneCSV *typedClone = (CZoneCSV *)zoneClone;
+                                CZoneCSV *typedSrc   = (CZoneCSV *)zoneSrc;
+                                typedClone.Assign(typedSrc);
+                            }
+                            else if (expectedType == "CZoneInfo")
+                            {
+                                CZoneInfo *typedClone = (CZoneInfo *)zoneClone;
+                                CZoneInfo *typedSrc   = (CZoneInfo *)zoneSrc;
+                                typedClone.Assign(typedSrc);
+                            }
+                            // Add more types here if needed
+
+                            dest.Add(zoneClone);
+                            if (verbose) Print("✅ Cloned ", expectedType, " at index ", i);
+                        }
+        
+        }
+         else
+         {
+            if (verbose)
+            {
+               string typeName = obj == NULL ? "NULL" : obj.ClassName();
+               Print("❌ Skipped non-", expectedType, " at index ", i, ": Type = ", typeName);
+            }
+         }
+      }
+
+      return dest.Total() > 0;
+   }
+}
+
+#endif

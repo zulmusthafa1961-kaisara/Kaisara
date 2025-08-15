@@ -27,6 +27,16 @@ string ZoneTypeToString(ZoneType zt)
    return "Unknown";
 }
 
+string RegimeToString(RegimeType regime) {
+   switch (regime) {
+      case REGIME_BUY:  return "BULL";
+      case REGIME_SELL:  return "BEAR";
+      case REGIME_NEUTRAL: return "NEUTRAL";
+      default: return "UNKNOWN";
+   }
+}
+
+
 RegimeType ConvertZoneTypeToRegimeType(ZoneType ztype)
 {
    switch (ztype)
