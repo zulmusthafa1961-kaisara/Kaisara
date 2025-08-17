@@ -200,6 +200,36 @@ CArrayObj *FilterRecentValidZones(CArrayObj *zones)
    return filtered;
 }
 
+///////////////////////////////////////////////////
+// FilterRecentValidZones
+///////////////////////////////////////////////////
+CArrayObj *FilterRecentValidM5Zones(CArrayObj *zones)
+{
+   if (zones == NULL || zones.Total() == 0)
+      return NULL;
+
+   datetime anchorTime = iTime(_Symbol, PERIOD_M5, 0); // Most recent H1 close
+   CArrayObj *filtered = new CArrayObj;
+
+   // Traverse from end to start to get most recent zones
+   for (int i = zones.Total() - 1; i >= 0 && filtered.Total() < 4; i--)
+   {
+      CZoneCSV *zone = (CZoneCSV *)zones.At(i);
+      if (zone == NULL) continue;
+
+      // Look-ahead filter: only include zones that start after H1 close
+      if (zone.t_start <= anchorTime)
+         filtered.Add(zone);
+   }
+
+   // Optional: restore chronological order
+   filtered.Sort(); // If available
+
+   return filtered;
+}
+
+
+
 
 //////////////////////////////////////////////////////
 // clean up rendering box   ; render once only
