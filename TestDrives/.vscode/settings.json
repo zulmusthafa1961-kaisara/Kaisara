@@ -1,11 +1,8 @@
 {
     "C_Cpp.default.includePath": [
-        "c:\\Program Files\\JustMarkets MetaTrader 5\\MetaEditor64.exe\\Include",
         "c:\\Users\\zulmu\\AppData\\Roaming\\MetaQuotes\\Terminal\\E7DB6AF1FE93F292652A5D3B98342601\\MQL5\\Include"
     ],
     "files.associations": {
-        "*.mq5": "cpp",
         "*.mqh": "cpp"
-    },
-    "C_Cpp.errorSquiggles": "disabled"
+    }
 }
