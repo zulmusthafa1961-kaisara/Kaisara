@@ -208,7 +208,7 @@ CArrayObj *FilterRecentValidM5Zones(CArrayObj *zones)
    if (zones == NULL || zones.Total() == 0)
       return NULL;
 
-   datetime anchorTime = iTime(_Symbol, PERIOD_M5, 0); // Most recent H1 close
+   datetime anchorTime = iTime(_Symbol, PERIOD_M5, 0); // Most recent M5 close
    CArrayObj *filtered = new CArrayObj;
 
    // Traverse from end to start to get most recent zones
@@ -224,6 +224,22 @@ CArrayObj *FilterRecentValidM5Zones(CArrayObj *zones)
 
    // Optional: restore chronological order
    filtered.Sort(); // If available
+
+   return filtered;
+}
+
+CArrayObj *FilterRecentM5ZonesNew(CArrayObj *source) {
+   if(source == NULL || source.Total() == 0) return NULL;
+
+   CArrayObj *filtered = new CArrayObj;
+
+   for(int i = 0; i < source.Total(); i++) {
+      CZoneCSV *z = (CZoneCSV *)source.At(i);
+      if(z == NULL) continue;
+      if(z.t_end <= TimeCurrent()) {
+         filtered.Add(z);
+      }
+   }
 
    return filtered;
 }
@@ -307,7 +323,7 @@ void RenderRecentZones(CArrayObj *validZones)
    box.UpdateColors(zoneColor[0], zoneColor[1], zoneColor[2], zoneColor[3]);
 
    // Step 6: Clean up
-   delete validZones;
+   //delete validZones;
 }
 
 
