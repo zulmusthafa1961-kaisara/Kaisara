@@ -285,7 +285,7 @@ void RefreshRegime(string tf)
 #endif
 
 void CZoneFusionManager::Fuse(CArrayObj *zonesToFuse) {
-   Print(__FUNCTION__ + " Fuse() in process ...  zonesToFuse.Sort() ");
+   //Print(__FUNCTION__ + " Fuse() in process ...  zonesToFuse.Sort() ");
    if (zonesToFuse == NULL || zonesToFuse.Total() == 0) return;
 
 // logging every zones which is flooding Journal tab
@@ -398,7 +398,7 @@ Print("🔍 Zone type at index ", i, ": ", zoneAnalyzer.ClassName());
 */
 
 CArrayObj* CZoneFusionManager::GetFusedZones() {
-   Print(__FUNCTION__ + " GetFusedZones() in process ... it just returns &m_fusedZones");
+   //Print(__FUNCTION__ + " GetFusedZones() in process ... it just returns &m_fusedZones");
    return &m_fusedZones;
 }
 

@@ -35,7 +35,7 @@ public:
    }
 
    void Analyze(CArrayObj *h1Zones, CArrayObj *m5Zones) {
-      Print(__FUNCTION__ + " Analyze() in process ...");
+      //Print(__FUNCTION__ + " Analyze() in process ...");
       h1Bias = "NEUTRAL";
       m5AlignedCount = 0;
       m5CounterCount = 0;
