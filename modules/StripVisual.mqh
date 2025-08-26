@@ -12,27 +12,6 @@
 class CRegimePhaseDetector;
 class CStationaryRectangles4Box;
 
-
-
-enum RegimePhase {
-   PHASE_NONE,
-   PHASE_BREAKOUT,
-   PHASE_CHOPPY,
-   PHASE_PULLBACK,
-   PHASE_CONTINUATION
-};
-
-string RegimePhaseToString(RegimePhase phase)
-{
-   switch (phase) {
-      case PHASE_BREAKOUT:     return "BRK";
-      case PHASE_PULLBACK:     return "PBK";
-      case PHASE_CONTINUATION: return "TRC";
-      default:                 return "UNK";
-   }
-}
-
-
 string StripModeToLabel(StripMode mode) {
    switch(mode) {
       case MODE_H1_ZONE:      return "H1 Zone";

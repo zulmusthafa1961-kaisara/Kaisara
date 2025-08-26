@@ -1,8 +1,11 @@
 #ifndef __CREGIME_PHASE_DETECTOR_MQH__
 #define __CREGIME_PHASE_DETECTOR_MQH__
 
+#include "RegimeTypes.mqh"
 #include "UnifiedRegimeModulesmqh.mqh"
 #include "StripVisual.mqh"  // ✅ Must come before instantiation
+
+
 
 
 //class CStripVisual;

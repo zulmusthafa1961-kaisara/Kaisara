@@ -49,6 +49,8 @@ private:
    void RenderZone(string timeframePrefix, string regimeTag, RegimeType regimeType, datetime t_start, datetime t_end, int index);
 };
 */
+class CRegimePhaseDetector;  // Forward declaration
+
 
 // integration with stateless
 class CStripBuilder : public CObject{
