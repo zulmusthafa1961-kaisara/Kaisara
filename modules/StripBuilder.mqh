@@ -85,6 +85,12 @@ public:
    void RenderZone(CZoneCSV *zone); 
    void DispatchZones(CArrayObj *zones, RegimeType regime);
 
+public:
+   //void RenderOverlay(CZoneCSV *phase, CRegimePhaseDetector *detector);  // ← Must exist
+   void RenderOverlay(string prefix, CZoneCSV *phase, CRegimePhaseDetector *detector);
+
+
+
 
 
 void SetSource(CArrayObj *zones)
@@ -203,6 +209,20 @@ void CStripBuilder::DispatchZones(CArrayObj *zones, RegimeType regime)
    }
 }
 
+//void CStripBuilder::RenderOverlay(CZoneCSV *phase, CRegimePhaseDetector *detector)
+void CStripBuilder::RenderOverlay(string prefix, CZoneCSV *phase, CRegimePhaseDetector *detector)
+{
+   if (phase == NULL || detector == NULL) return;
+
+   // Example rendering logic — customize as needed
+   string _prefix = prefix;   //phase.GetPrefix();  // assuming CZoneCSV has this
+   int subwin = 1;
+   int offset = 0;
+   StripMode mode = MODE_REGIME_PHASE;
+
+   CStripVisual visual(_prefix, subwin, offset, mode);
+   visual.RenderStrip(phase);  // or RenderToChart, depending on your overlay logic
+}
 
 /*
 class CStripBuilder : public CObject

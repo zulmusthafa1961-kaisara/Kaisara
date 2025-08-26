@@ -20,7 +20,7 @@ void CZoneRenderer::RenderZones(CArrayObj *zones, int chartId, ENUM_TIMEFRAMES t
       return;
    }
    
-   CStripVisual stripRenderer("Z", 1, 0);  // Prefix, subwindow, alignment
+   CStripVisual stripRenderer("Z", 1, 0, MODE_M5_ZONE);  // Prefix, subwindow, alignment
 
    for (int i = 0; i < zones.Total(); i++)
    {

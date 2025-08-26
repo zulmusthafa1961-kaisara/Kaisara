@@ -22,9 +22,21 @@ private:
    static int nextId;
    int instanceId;   
 
+private:
+   string m_fingerprint;   
+
    public:   
+   double confidence; 
    //double price_top, price_bottom;
    //double price_high, price_low;
+   int phase;
+
+   int GetPhase() const { return phase; } 
+
+public:
+   // Optional: fingerprint support
+   string fingerprint() const { return m_fingerprint; }
+   void SetFingerprint(string fp) { m_fingerprint = fp; }
 
 public:
    //using CRectInfo::Assign;  // ✅ Unhide base method

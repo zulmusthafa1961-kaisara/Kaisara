@@ -1,15 +1,22 @@
 #ifndef __CREGIME_PHASE_DETECTOR_MQH__
 #define __CREGIME_PHASE_DETECTOR_MQH__
 
-enum RegimePhase {
-   PHASE_NONE,
-   PHASE_BREAKOUT,
-   PHASE_CHOPPY,
-   PHASE_PULLBACK,
-   PHASE_CONTINUATION
-};
-
 #include "UnifiedRegimeModulesmqh.mqh"
+#include "StripVisual.mqh"  // ✅ Must come before instantiation
+
+
+//class CStripVisual;
+// Global scope 
+//CStripVisual stripH1; //("SR1_", 1, 0, MODE_H1_ZONE);
+//CStripVisual stripM5; //("SR3_", 1, 0, MODE_M5_ZONE);
+//CStripVisual stripRegime; //("SR6_", 1, 0, MODE_REGIME_PHASE);  // Rightmost strip
+//CStationaryRectangles4Box stripRegimeBox; //("SR6_", 1, 0, MODE_REGIME_PHASE);
+
+CStripVisual *stripH1;
+CStripVisual *stripM5;
+CStripVisual *stripRegime;
+CStationaryRectangles4Box *stripRegimeBox;
+
 
 class CRegimePhaseDetector {
 private:
@@ -18,6 +25,25 @@ private:
    int m5CounterCount;
    bool isBreakout;
    bool isChoppy;
+
+private:
+   double biasConfidenceValue;
+
+private:
+   CArrayObj m_validZones; // ✅ Holds validated zones
+
+public:
+   CArrayObj *GetValidZones() {
+      return &m_validZones;
+   }   
+
+public:
+   double BiasConfidence() {
+      return biasConfidenceValue;
+   }
+
+public:
+   datetime GetStartTime() const;   
 
 public:
    //RegimePhase Detect(CArrayObj *h1Zones, CArrayObj *m5Zones);
@@ -34,13 +60,13 @@ public:
       m5CounterCount = 0;
    }
 
-   void Analyze(CArrayObj *h1Zones, CArrayObj *m5Zones) {
-      //Print(__FUNCTION__ + " Analyze() in process ...");
-      h1Bias = "NEUTRAL";
-      m5AlignedCount = 0;
-      m5CounterCount = 0;
+void Analyze(CArrayObj *h1Zones, CArrayObj *m5Zones) {
+   //Print(__FUNCTION__ + " Analyze() in process ...");
+   h1Bias = "NEUTRAL";
+   m5AlignedCount = 0;
+   m5CounterCount = 0;
 
-      if(h1Zones == NULL || h1Zones.Total() < 2) return;
+   if(h1Zones == NULL || h1Zones.Total() < 2) return;
       //if(m5Zones == NULL || m5Zones.Total() < 4) return;
 
  if(m5Zones == NULL) {
@@ -57,7 +83,6 @@ if(m5Zones.Total() < 4) {
    Print("⚠️ M5validZones has insufficient zones: ", m5Zones.Total());
 }
      
-
       // Step 1: Determine H1 bias
       int h1Buy = 0, h1Sell = 0;
       for(int i = h1Zones.Total() - 2; i < h1Zones.Total(); i++) {
@@ -85,14 +110,25 @@ if(m5Zones.Total() < 4) {
          }
       }
 
-      // Step 3: Log for validation
+
+      // Step 3: Compute bias confidence
+      int totalVotes = m5AlignedCount + m5CounterCount;
+      double weight = MathMin(1.0, totalVotes / 6.0); // dampen confidence if zone count is low
+      biasConfidenceValue = weight * ((double)m5AlignedCount / totalVotes);      
+
+      if(totalVotes == 0) biasConfidenceValue = 0.0;
+      else biasConfidenceValue = (double)m5AlignedCount / totalVotes;
+
+      // Step 4: Log for validation
       Print("📊 RegimePhaseDetector:");
       Print("   H1 Bias = ", h1Bias);
       Print("   M5 Aligned = ", m5AlignedCount);
       Print("   M5 Counter = ", m5CounterCount);
+      Print("   Bias Confidence = ", DoubleToString(biasConfidenceValue, 2));
+
    }
 
-   RegimePhase Detect(CArrayObj *h1Zones, CArrayObj *m5Zones) {
+RegimePhase Detect(CArrayObj *h1Zones, CArrayObj *m5Zones) {
    Analyze(h1Zones, m5Zones);
 
    if(h1Bias == "NEUTRAL") return PHASE_CHOPPY;
@@ -111,8 +147,11 @@ if(m5Zones.Total() < 4) {
    //int Counter() const { return m5CounterCount; }
 };
 
-
-
+/*
+CArrayObj *CRegimePhaseDetector::GetValidZones() {
+   return &this.m_validZones; // Or however your zones are stored
+}
+*/
 
 
 #endif // __CREGIME_PHASE_DETECTOR_MQH__

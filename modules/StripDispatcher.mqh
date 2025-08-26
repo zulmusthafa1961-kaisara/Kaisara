@@ -85,7 +85,8 @@ public:
       string label = StringFormat("%s-%s (%dm)", zone.GetPrefix(), regimeLabel, durationMin);
 
 
-      CStripVisual visual(zone.GetPrefix(), rightAligned ? 1 : 0);
+      //CStripVisual visual(zone.GetPrefix(), rightAligned ? 1 : 0);
+      CStripVisual visual(zone.GetPrefix(),1,0,MODE_H1_ZONE);
       visual.RenderToChart(i, regimeColor, label, t_start, t_end);
    }
 }
