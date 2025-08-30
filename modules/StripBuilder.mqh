@@ -214,7 +214,10 @@ void CStripBuilder::DispatchZones(CArrayObj *zones, RegimeType regime)
 //void CStripBuilder::RenderOverlay(CZoneCSV *phase, CRegimePhaseDetector *detector)
 void CStripBuilder::RenderOverlay(string prefix, CZoneCSV *phase, CRegimePhaseDetector *detector)
 {
-   if (phase == NULL || detector == NULL) return;
+   if (phase == NULL || detector == NULL) {
+      Print("⚠️ RenderOverlay skipped: invalid phase or detector");  
+      return;
+   }
 
    // Example rendering logic — customize as needed
    string _prefix = prefix;   //phase.GetPrefix();  // assuming CZoneCSV has this
