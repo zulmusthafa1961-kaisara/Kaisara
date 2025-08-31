@@ -55,4 +55,20 @@ void RenderRegimePhaseOverlay(RegimePhase phase, double confidence) {
    box.UpdateColors(boxColor[0], boxColor[1], boxColor[2], boxColor[3]);
 }
 
+void SafeDelete(CArrayObj *&zoneArray, string label)
+{
+   if (zoneArray != NULL)
+   {
+      Print("🧹 SafeDelete: ", label, " count before delete = ", zoneArray.Total());
+      delete zoneArray;
+      zoneArray = NULL;
+      Print("✅ SafeDelete: ", label, " deleted and nulled");
+   }
+   else
+   {
+      Print("⚠️ SafeDelete: ", label, " was already NULL");
+   }
+}
+
+
 #endif
