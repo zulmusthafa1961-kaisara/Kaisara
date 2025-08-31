@@ -6,38 +6,57 @@
 class CZoneCache {
 private:
    CArrayObj *h1Snapshot;
-   datetime lastH1Refresh;
+   datetime lastRefreshTime;
 
 public:
    CZoneCache() {
       h1Snapshot = NULL;
-      lastH1Refresh = 0;
+      lastRefreshTime = 0;
    }
 
    void RefreshH1(CArrayObj *newZones) {
-      if(CheckPointer(newZones) != POINTER_DYNAMIC || newZones.Total() == 0) {
-         Print("⚠️ ZoneCache: Invalid H1 zone snapshot");
+      if (TimeCurrent() < lastRefreshTime) {
+         Print("⚠️ Attempt to refresh with older timestamp. Ignored.");
          return;
       }
 
-      if(h1Snapshot != NULL) delete h1Snapshot;
-      h1Snapshot = newZones;
-      lastH1Refresh = TimeCurrent();
+      if (newZones == NULL || newZones.Total() == 0) {
+         Print("⚠️ RefreshH1 aborted: newZones is NULL or empty");
+         return;
+      }
+
+      if (h1Snapshot != NULL) delete h1Snapshot;
+      h1Snapshot = new CArrayObj;
+      for (int i = 0; i < newZones.Total(); i++) {
+         h1Snapshot.Add(newZones.At(i));  // shallow copy; clone if needed
+      }
+
+      lastRefreshTime = TimeCurrent();
 
       PrintFormat("✅ ZoneCache: H1 snapshot refreshed @ %s | Zones = %d",
-                  TimeToString(lastH1Refresh), h1Snapshot.Total());
+                  TimeToString(lastRefreshTime), h1Snapshot.Total());
    }
 
    CArrayObj *GetH1Snapshot() {
-      if(CheckPointer(h1Snapshot) != POINTER_DYNAMIC) {
+      if (CheckPointer(h1Snapshot) != POINTER_DYNAMIC) {
          Print("❌ ZoneCache: H1 snapshot pointer invalid");
          return NULL;
       }
+
+      PrintFormat("📦 ZoneCache: Retrieved H1 snapshot | Zones = %d", h1Snapshot.Total());
+      PrintFormat("📦 Snapshot check: Pointer=%d | Zones=%d | LastRefresh=%s",
+                  CheckPointer(h1Snapshot), h1Snapshot.Total(), TimeToString(lastRefreshTime));
+
       return h1Snapshot;
    }
 
+   bool HasValidSnapshot() {
+      return (CheckPointer(h1Snapshot) == POINTER_DYNAMIC && h1Snapshot.Total() > 0);
+   }
+
    datetime LastRefreshTime() {
-      return lastH1Refresh;
+      return lastRefreshTime;
    }
 };
+
 #endif
