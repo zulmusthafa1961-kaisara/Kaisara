@@ -22,4 +22,37 @@ void RenderZonesToStrip(CArrayObj *zones, string prefix, int subwin, StripMode m
    }
 }
 
+
+// new
+void RenderRegimePhaseOverlay(RegimePhase phase, double confidence) {
+   const int subwin = 1;           // Subwindow 1 for diagnostic overlays
+   const int leftMargin = 680;     // Right strip for regime phase
+   string label[4] = {"BREAKOUT", "CHOPPY", "PULLBACK", "CONTINUATION"};
+   string content[4];
+   color boxColor[4] = {clrGray, clrGray, clrGray, clrGray};
+
+   for(int i = 0; i < 4; i++) {
+      content[i] = label[i] + "\nConfidence: " + DoubleToString(confidence, 2);
+   }
+
+   switch(phase) {
+      case PHASE_BREAKOUT:      boxColor[0] = clrGreen; break;
+      case PHASE_CHOPPY:        boxColor[1] = clrOrange; break;
+      case PHASE_PULLBACK:      boxColor[2] = clrRed; break;
+      case PHASE_CONTINUATION:  boxColor[3] = clrBlue; break;
+   }
+
+   CStationaryRectangles4Box box;
+   box.SetSubWindow(subwin);
+   box.SetLeftMargin(leftMargin);
+   box.SetBoxGap(BOX_GAP);
+   box.SetBoxDimensions(BOX_W, BOX_H);
+   box.SetTopMargin(TOP_MARGIN);
+   box.Initialize();
+   box.ClearBoxes();
+   box.Create();
+   box.UpdateLabels(content[0], content[1], content[2], content[3]);
+   box.UpdateColors(boxColor[0], boxColor[1], boxColor[2], boxColor[3]);
+}
+
 #endif

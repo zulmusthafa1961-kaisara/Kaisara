@@ -19,6 +19,8 @@ CStripVisual *stripH1;
 CStripVisual *stripM5;
 CStripVisual *stripRegime;
 CStationaryRectangles4Box *stripRegimeBox;
+CArrayObj *H1validZones;
+CArrayObj *M5validZones;
 
 
 class CRegimePhaseDetector {
@@ -69,11 +71,20 @@ void Analyze(CArrayObj *h1Zones, CArrayObj *m5Zones) {
    m5AlignedCount = 0;
    m5CounterCount = 0;
 
-   if(h1Zones == NULL || h1Zones.Total() < 2) return;
+   //if(h1Zones == NULL || h1Zones.Total() < 2) return;
+   if(h1Zones == NULL) {
+   Print("⚠️ H1validZones is NULL");
+   return;
+}
       //if(m5Zones == NULL || m5Zones.Total() < 4) return;
 
  if(m5Zones == NULL) {
    Print("⚠️ M5validZones is NULL");
+   return;
+}
+
+if(CheckPointer(h1Zones) != POINTER_DYNAMIC) {
+   Print("❌ H1validZones is not a valid dynamic pointer");
    return;
 }
 
@@ -86,7 +97,11 @@ if(m5Zones.Total() < 4) {
    Print("⚠️ M5validZones has insufficient zones: ", m5Zones.Total());
 }
      
-      // Step 1: Determine H1 bias
+if(h1Zones.Total() < 4) {
+   Print("⚠️ H1validZones has insufficient zones: ", h1Zones.Total());
+}
+ 
+// Step 1: Determine H1 bias
       int h1Buy = 0, h1Sell = 0;
       for(int i = h1Zones.Total() - 2; i < h1Zones.Total(); i++) {
          CZoneCSV *z = (CZoneCSV *)h1Zones.At(i);

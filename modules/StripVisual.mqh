@@ -318,39 +318,173 @@ void RenderZones(CStationaryRectangles4Box &box, CArrayObj *zones, string phaseL
 
 
 // Add other methods as needed...
-};
 
-// new
-void RenderRegimePhaseOverlay(RegimePhase phase, double confidence) {
-   const int subwin = 1;           // Subwindow 1 for diagnostic overlays
-   const int leftMargin = 680;     // Right strip for regime phase
-   string label[4] = {"BREAKOUT", "CHOPPY", "PULLBACK", "CONTINUATION"};
-   string content[4];
-   color boxColor[4] = {clrGray, clrGray, clrGray, clrGray};
+// put back what was working before, prior to the 'confused update' 
+////////////////////////////////////////////////////////////////////////////////////////
+// was working before as part of CSTRIPVISUAL
+//////////////////////////////////////////////////////
+// clean up rendering box   ; render once only
+//////////////////////////////////////////////////////
+void RenderRecentZones(CArrayObj *validZones)
+{
+   //  Step 1: uses validZones which already Filter zones by t_start ≤ currentTime 
+   
+   if (validZones == NULL || validZones.Total() < 4)
+      return;
 
-   for(int i = 0; i < 4; i++) {
-      content[i] = label[i] + "\nConfidence: " + DoubleToString(confidence, 2);
+   string label[4], startStr[4], endStr[4], priceStr[4], regimeStr[4];
+   color zoneColor[4];
+
+
+   // Step 2: Collect all info from zones
+   for (int i = 0; i < 4; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+
+      label[i]     = "L" + IntegerToString(i);
+      startStr[i]  = TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES);
+      endStr[i]    = TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES);
+      priceStr[i]  = StringFormat("low = %.2f | high = %.2f", zone.price_low, zone.price_high);
+      regimeStr[i] = EnumToString(zone.GetRegime());
+
+      zoneColor[i] = clrGray;
+      if (zone.GetRegime() == REGIME_BUY)  zoneColor[i] = clrGreen;
+      else if (zone.GetRegime() == REGIME_SELL) zoneColor[i] = clrRed;
    }
 
-   switch(phase) {
-      case PHASE_BREAKOUT:      boxColor[0] = clrGreen; break;
-      case PHASE_CHOPPY:        boxColor[1] = clrOrange; break;
-      case PHASE_PULLBACK:      boxColor[2] = clrRed; break;
-      case PHASE_CONTINUATION:  boxColor[3] = clrBlue; break;
+   // Step 3: Fingerprint gating
+   static string lastFingerprintConcat = "";
+   string currentFingerprintConcat = "";
+
+   for (int i = 0; i < 4; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+      currentFingerprintConcat += zone.fingerprint();
    }
 
-   CStationaryRectangles4Box box;
-   box.SetSubWindow(subwin);
-   box.SetLeftMargin(leftMargin);
+   datetime currentTime = iTime(_Symbol, PERIOD_H1, 0);  // Current H1 candle close
+   //LogRecentZoneDiagnostics(currentTime, validZones, currentFingerprintConcat, lastFingerprintConcat);
+   LogRecentZoneDiagnostics(PERIOD_H1, currentTime, validZones, currentFingerprintConcat, lastFingerprintConcat);
+
+   if (currentFingerprintConcat == lastFingerprintConcat)
+   {
+      Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
+      return;
+   }
+
+   lastFingerprintConcat = currentFingerprintConcat;
+
+
+   // Step 4: Clear previous rendering
+   CStationaryRectangles4Box box("SR1_");
+   box.SetSubWindow(m_subwindow);
+   box.SetLeftMargin(LEFT_MARGIN);
    box.SetBoxGap(BOX_GAP);
    box.SetBoxDimensions(BOX_W, BOX_H);
    box.SetTopMargin(TOP_MARGIN);
    box.Initialize();
    box.ClearBoxes();
+
+   // Step 5: Render once
    box.Create();
-   box.UpdateLabels(content[0], content[1], content[2], content[3]);
-   box.UpdateColors(boxColor[0], boxColor[1], boxColor[2], boxColor[3]);
+   box.UpdateLabels(
+      label[0] + "\n" + startStr[0] + "\n" + endStr[0] + "\n" + priceStr[0] + "\n" + regimeStr[0],
+      label[1] + "\n" + startStr[1] + "\n" + endStr[1] + "\n" + priceStr[1] + "\n" + regimeStr[1],
+      label[2] + "\n" + startStr[2] + "\n" + endStr[2] + "\n" + priceStr[2] + "\n" + regimeStr[2],
+      label[3] + "\n" + startStr[3] + "\n" + endStr[3] + "\n" + priceStr[3] + "\n" + regimeStr[3]
+   );
+
+   box.UpdateColors(zoneColor[0], zoneColor[1], zoneColor[2], zoneColor[3]);
+
+   // Step 6: Clean up
+   //delete validZones;
 }
+
+//////////////////////////////////////////////////////
+// clean up rendering box   ; render once only
+//////////////////////////////////////////////////////
+void RenderRecentM5Zones(CArrayObj *validZones)
+{
+   //  Step 1: uses validZones which already Filter zones by t_start ≤ currentTime 
+   
+   if (validZones == NULL || validZones.Total() < 4)
+      return;
+
+   string label[4], startStr[4], endStr[4], priceStr[4], regimeStr[4];
+   color zoneColor[4];
+
+
+   // Step 2: Collect all info from zones
+   for (int i = 0; i < 4; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+
+      label[i]     = "L" + IntegerToString(i);
+      startStr[i]  = TimeToString(zone.t_start, TIME_DATE | TIME_MINUTES);
+      endStr[i]    = TimeToString(zone.t_end, TIME_DATE | TIME_MINUTES);
+      priceStr[i]  = StringFormat("low = %.2f | high = %.2f", zone.price_low, zone.price_high);
+      regimeStr[i] = EnumToString(zone.GetRegime());
+
+      zoneColor[i] = clrGray;
+      if (zone.GetRegime() == REGIME_BUY)  zoneColor[i] = clrGreen;
+      else if (zone.GetRegime() == REGIME_SELL) zoneColor[i] = clrRed;
+   }
+
+   // Step 3: Fingerprint gating
+   static string lastFingerprintConcat = "";
+   string currentFingerprintConcat = "";
+
+   for (int i = 0; i < 4; i++)
+   {
+      CZoneCSV *zone = (CZoneCSV *)validZones.At(i);
+      if (zone == NULL) continue;
+      currentFingerprintConcat += zone.fingerprint();
+   }
+
+   datetime currentTime = iTime(_Symbol, PERIOD_M5, 0);  // Current H1 candle close
+   LogRecentZoneDiagnostics(PERIOD_M5,currentTime, validZones, currentFingerprintConcat, lastFingerprintConcat);
+
+   if (currentFingerprintConcat == lastFingerprintConcat)
+   {
+      //Print("🔁 No change in recent zone fingerprints. Skipping rendering.");
+      return;
+   }
+
+   lastFingerprintConcat = currentFingerprintConcat;
+
+
+   // Step 4: Clear previous rendering
+   CStationaryRectangles4Box boxM5("SR5_");
+   int _subwindow = 1;
+   boxM5.SetSubWindow(_subwindow);
+   boxM5.SetLeftMargin(LEFT_MARGIN_MIDDLE_STRIP);
+   boxM5.SetBoxGap(BOX_GAP);
+   boxM5.SetBoxDimensions(BOX_W, BOX_H);
+   boxM5.SetTopMargin(TOP_MARGIN);
+   boxM5.Initialize();
+   boxM5.ClearBoxes();
+
+   // Step 5: Render once
+   boxM5.Create();
+   boxM5.UpdateLabels(
+      label[0] + "\n" + startStr[0] + "\n" + endStr[0] + "\n" + priceStr[0] + "\n" + regimeStr[0],
+      label[1] + "\n" + startStr[1] + "\n" + endStr[1] + "\n" + priceStr[1] + "\n" + regimeStr[1],
+      label[2] + "\n" + startStr[2] + "\n" + endStr[2] + "\n" + priceStr[2] + "\n" + regimeStr[2],
+      label[3] + "\n" + startStr[3] + "\n" + endStr[3] + "\n" + priceStr[3] + "\n" + regimeStr[3]
+   );
+
+   boxM5.UpdateColors(zoneColor[0], zoneColor[1], zoneColor[2], zoneColor[3]);
+
+   // Step 6: Clean up
+   //delete validZones;
+}
+
+};
+
+
 
 
 // Diagnostic-only rendering (prints metadata)
@@ -623,7 +757,7 @@ void RenderRecentM5Zones(CArrayObj *validZones)
    boxM5.UpdateColors(zoneColor[0], zoneColor[1], zoneColor[2], zoneColor[3]);
 
    // Step 6: Clean up
-   delete validZones;
+   //delete validZones;
 }
 
 /*
