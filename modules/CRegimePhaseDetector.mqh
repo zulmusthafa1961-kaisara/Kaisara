@@ -15,12 +15,16 @@
 //CStripVisual stripRegime; //("SR6_", 1, 0, MODE_REGIME_PHASE);  // Rightmost strip
 //CStationaryRectangles4Box stripRegimeBox; //("SR6_", 1, 0, MODE_REGIME_PHASE);
 
+class ZoneCache;
+
 CStripVisual *stripH1;
 CStripVisual *stripM5;
 CStripVisual *stripRegime;
 CStationaryRectangles4Box *stripRegimeBox;
 CArrayObj *H1validZones;
 CArrayObj *M5validZones;
+
+
 
 
 class CRegimePhaseDetector {
